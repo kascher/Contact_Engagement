@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <assignments>
+        <description>Sums Active Contacts from Get Records and Assigns to OCRCount</description>
+        <name>Set_OCRCount</name>
+        <label>Set OCRCount</label>
+        <locationX>176</locationX>
+        <locationY>647</locationY>
+        <assignmentItems>
+            <assignToReference>OCRCount</assignToReference>
+            <operator>AssignCount</operator>
+            <value>
+                <elementReference>Get_Active_Contacts</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <description>When Opp moved to Closed Lost or Closed won, sum Opportunity Contact Roles with Last Activity Date between Opportunity Creation Date and Closed Date.</description>
+    <environments>Default</environments>
+    <formulas>
+        <description>Defaults to Opportunity Created Date if blank</description>
+        <name>ActiveWindowStartDate</name>
+        <dataType>Date</dataType>
+        <expression>IF(ISNULL($CustomMetadata.N_Days__mdt.Master.Active_Contact_Window__c), DATEVALUE({!$Record.CreatedDate}),{!ActiveWindowStartSubFormula})</expression>
+    </formulas>
+    <formulas>
+        <name>ActiveWindowStartSubFormula</name>
+        <dataType>Date</dataType>
+        <expression>{!$Record.CloseDate} - {!$CustomMetadata.N_Days__mdt.Master.Active_Contact_Window__c}</expression>
+    </formulas>
+    <formulas>
+        <description>Checks if Last Activity Date is between N Days ago and Close Date</description>
+        <name>isActive</name>
+        <dataType>Boolean</dataType>
+        <expression>{!$Record.IsWon}</expression>
+    </formulas>
+    <interviewLabel>Opportunity | Count Active Contacts when Closed {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Opportunity | Count Active Contacts when Closed</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Active_Contacts</name>
+        <label>Get Active Contacts</label>
+        <locationX>176</locationX>
+        <locationY>539</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Set_OCRCount</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>LastActivityDate</field>
+            <operator>LessThanOrEqualTo</operator>
+            <value>
+                <elementReference>$Record.CloseDate</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>LastActivityDate</field>
+            <operator>GreaterThanOrEqualTo</operator>
+            <value>
+                <elementReference>ActiveWindowStartDate</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>Contact</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_All_Opp_OCRs</name>
+        <label>Get All Opp OCRs</label>
+        <locationX>176</locationX>
+        <locationY>323</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>ContactIds</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>OpportunityId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>OpportunityContactRole</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_All_Opp_OCRs</targetReference>
+        </connector>
+        <doesRequireRecordChangedToMeetCriteria>true</doesRequireRecordChangedToMeetCriteria>
+        <filterFormula>{!$Record.IsClosed} &amp;&amp; ({!$CustomMetadata.Toggle_Switch__mdt.Master.All_Switch__c} || {!$CustomMetadata.Toggle_Switch__mdt.Master.Opportunity_Count_Active_OCRs__c})</filterFormula>
+        <object>Opportunity</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Draft</status>
+    <transforms>
+        <description>Extracts Contact Ids from OCR collection</description>
+        <name>ContactIds</name>
+        <label>ContactIds</label>
+        <locationX>176</locationX>
+        <locationY>431</locationY>
+        <connector>
+            <targetReference>Get_Active_Contacts</targetReference>
+        </connector>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <scale>0</scale>
+        <transformValues>
+            <transformValueActions>
+                <transformType>Map</transformType>
+                <value>
+                    <elementReference>Get_All_Opp_OCRs[$EachItem].ContactId</elementReference>
+                </value>
+            </transformValueActions>
+        </transformValues>
+    </transforms>
+    <variables>
+        <name>currentItemFromSourceCollection</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>OCRCount</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+</Flow>

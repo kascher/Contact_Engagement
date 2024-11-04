@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Opportunity_Count_Active_OCRs__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>On/Off switch for Opportunity | Count Active Contacts when Closed</description>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Opportunity Count Active OCRs</label>
+    <type>Checkbox</type>
+</CustomField>
