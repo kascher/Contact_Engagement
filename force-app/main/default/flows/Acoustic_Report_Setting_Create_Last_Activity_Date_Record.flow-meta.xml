@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <description>Creates the initial Last Activity Date Custom Setting Record.</description>
+    <environments>Default</environments>
+    <interviewLabel>Acoustic Report Setting | Create Last Activity Date Record {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Acoustic Report Setting | Create Last Activity Date Record</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordCreates>
+        <name>Create_Last_Activity_Date</name>
+        <label>Create Last Activity Date</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Field_API_Name__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>LastActivityDate</stringValue>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Field_API_Name__c</field>
+            <value>
+                <stringValue>LastActivityDate</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Name</field>
+            <value>
+                <stringValue>Last Activity Date</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Acoustic_Report_Settings__c</object>
+        <operationMultMatchingRecords>UpdateLatestRecord</operationMultMatchingRecords>
+        <operationOneMatchingRecord>UpdateAllRecords</operationOneMatchingRecord>
+        <operationZeroMatchingRecords>AddRecord</operationZeroMatchingRecords>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Create_Last_Activity_Date</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>LastActivityDateRecordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+</Flow>

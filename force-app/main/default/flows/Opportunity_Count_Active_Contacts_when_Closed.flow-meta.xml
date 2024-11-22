@@ -1,12 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <description>Prepares for SOQL</description>
+        <name>Add_Quotes_to_Collection</name>
+        <label>Add Quotes to Collection</label>
+        <locationX>182</locationX>
+        <locationY>1055</locationY>
+        <actionName>AddQuotesToFields</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>SOQL_for_Active_Contacts</targetReference>
+        </connector>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>fieldCollection</name>
+            <value>
+                <elementReference>ContactIds</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>AddQuotesToFields</nameSegment>
+        <offset>0</offset>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+        <versionSegment>1</versionSegment>
+    </actionCalls>
+    <actionCalls>
+        <description>Custom SOQL query is needed, rather than standard Get Element because the LastActivityDate field is dynamic.</description>
+        <name>SOQL_for_Active_Contacts</name>
+        <label>SOQL for Active Contacts</label>
+        <locationX>182</locationX>
+        <locationY>1163</locationY>
+        <actionName>ExecuteSOQL</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>Set_OCRCount</targetReference>
+        </connector>
+        <dataTypeMappings>
+            <typeName>U__sObjects</typeName>
+            <typeValue>Contact</typeValue>
+        </dataTypeMappings>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>soqlQuery</name>
+            <value>
+                <elementReference>SOQLBody</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>ExecuteSOQL</nameSegment>
+        <offset>0</offset>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+        <versionSegment>1</versionSegment>
+    </actionCalls>
     <apiVersion>62.0</apiVersion>
     <assignments>
         <description>Sums Active Contacts from Get Records and Assigns to OCRCount</description>
         <name>Set_OCRCount</name>
         <label>Set OCRCount</label>
-        <locationX>176</locationX>
-        <locationY>755</locationY>
+        <locationX>182</locationX>
+        <locationY>1271</locationY>
         <assignmentItems>
             <assignToReference>OCRCount</assignToReference>
             <operator>AssignCount</operator>
@@ -14,7 +64,52 @@
                 <elementReference>Get_Active_Contacts</elementReference>
             </value>
         </assignmentItems>
+        <connector>
+            <targetReference>Get_Active_Contacts</targetReference>
+        </connector>
     </assignments>
+    <assignments>
+        <description>Updates the API name of the field if it already exists.</description>
+        <name>Update_LastActivityDateAPIName</name>
+        <label>Update LastActivityDateAPIName</label>
+        <locationX>50</locationX>
+        <locationY>647</locationY>
+        <assignmentItems>
+            <assignToReference>LastActivityDateAPIName</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Last_Activity_Date_Custom_Setting.Field_API_Name__c</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Get_All_Opp_OCRs</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <name>Check_for_Last_Activity_Date_Record</name>
+        <label>Check for Last Activity Date Record</label>
+        <locationX>182</locationX>
+        <locationY>539</locationY>
+        <defaultConnector>
+            <targetReference>Create_Last_Activity_Date_Record</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Create Custom Setting Record</defaultConnectorLabel>
+        <rules>
+            <name>Record_Exists_Keep_Going</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Last_Activity_Date_Custom_Setting.Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Update_LastActivityDateAPIName</targetReference>
+            </connector>
+            <label>Record Exists, Keep Going</label>
+        </rules>
+    </decisions>
     <description>When Opp moved to Closed Lost or Closed won, sum Opportunity Contact Roles with Last Activity Date between Opportunity Creation Date and Closed Date.</description>
     <environments>Default</environments>
     <formulas>
@@ -27,6 +122,11 @@
         <name>ActiveWindowStartSubFormula</name>
         <dataType>Date</dataType>
         <expression>{!$Record.CloseDate} - {!Active_Contact_Window_Custom_Record.Number_of_Days__c}</expression>
+    </formulas>
+    <formulas>
+        <name>DateFormula</name>
+        <dataType>Date</dataType>
+        <expression>{!$Record.CloseDate}</expression>
     </formulas>
     <formulas>
         <description>Checks if Last Activity Date is between N Days ago and Close Date</description>
@@ -59,11 +159,11 @@
         <description>This is the record holding N days specific to Active Contact Window</description>
         <name>Active_Contact_Window_Custom_Record</name>
         <label>Active Contact Window Custom Record</label>
-        <locationX>176</locationX>
+        <locationX>182</locationX>
         <locationY>323</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>Get_All_Opp_OCRs</targetReference>
+            <targetReference>Get_Last_Activity_Date_Custom_Setting</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -80,12 +180,9 @@
     <recordLookups>
         <name>Get_Active_Contacts</name>
         <label>Get Active Contacts</label>
-        <locationX>176</locationX>
-        <locationY>647</locationY>
+        <locationX>182</locationX>
+        <locationY>1379</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>Set_OCRCount</targetReference>
-        </connector>
         <filterLogic>and</filterLogic>
         <filters>
             <field>LastActivityDate</field>
@@ -101,6 +198,13 @@
                 <elementReference>ActiveWindowStartDate</elementReference>
             </value>
         </filters>
+        <filters>
+            <field>Id</field>
+            <operator>In</operator>
+            <value>
+                <elementReference>ContactIds</elementReference>
+            </value>
+        </filters>
         <getFirstRecordOnly>false</getFirstRecordOnly>
         <object>Contact</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
@@ -108,8 +212,8 @@
     <recordLookups>
         <name>Get_All_Opp_OCRs</name>
         <label>Get All Opp OCRs</label>
-        <locationX>176</locationX>
-        <locationY>431</locationY>
+        <locationX>182</locationX>
+        <locationY>839</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>ContactIds</targetReference>
@@ -126,8 +230,30 @@
         <object>OpportunityContactRole</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <recordLookups>
+        <description>Gets the Custom Setting Related to the Last Activity Date field being used in the org</description>
+        <name>Get_Last_Activity_Date_Custom_Setting</name>
+        <label>Get Last Activity Date Custom Setting</label>
+        <locationX>182</locationX>
+        <locationY>431</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Check_for_Last_Activity_Date_Record</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Name</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Last Activity Date</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Acoustic_Report_Settings__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
     <start>
-        <locationX>50</locationX>
+        <locationX>56</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>Active_Contact_Window_Custom_Record</targetReference>
@@ -139,14 +265,31 @@
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Draft</status>
+    <subflows>
+        <description>Creates the Custom Setting Record if it doesn&apos;t exist</description>
+        <name>Create_Last_Activity_Date_Record</name>
+        <label>Create Last Activity Date Record</label>
+        <locationX>314</locationX>
+        <locationY>647</locationY>
+        <connector>
+            <targetReference>Get_All_Opp_OCRs</targetReference>
+        </connector>
+        <flowName>Acoustic_Report_Setting_Create_Last_Activity_Date_Record</flowName>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </subflows>
+    <textTemplates>
+        <name>SOQLBody</name>
+        <isViewedAsPlainText>true</isViewedAsPlainText>
+        <text>select id from Contact where {!LastActivityDateAPIName} &lt;= 2024-12-01 AND Id IN ({!Add_Quotes_to_Collection.fieldString})</text>
+    </textTemplates>
     <transforms>
         <description>Extracts Contact Ids from OCR collection</description>
         <name>ContactIds</name>
         <label>ContactIds</label>
-        <locationX>176</locationX>
-        <locationY>539</locationY>
+        <locationX>182</locationX>
+        <locationY>947</locationY>
         <connector>
-            <targetReference>Get_Active_Contacts</targetReference>
+            <targetReference>Add_Quotes_to_Collection</targetReference>
         </connector>
         <dataType>String</dataType>
         <isCollection>true</isCollection>
@@ -166,6 +309,17 @@
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>The API Name of the field used to track a Contact&apos;s Last Activity Date in this org.</description>
+        <name>LastActivityDateAPIName</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <stringValue>LastActivityDate</stringValue>
+        </value>
     </variables>
     <variables>
         <name>OCRCount</name>
