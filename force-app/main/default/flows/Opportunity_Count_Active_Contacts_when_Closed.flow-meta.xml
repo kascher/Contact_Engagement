@@ -6,7 +6,7 @@
         <name>Set_OCRCount</name>
         <label>Set OCRCount</label>
         <locationX>176</locationX>
-        <locationY>647</locationY>
+        <locationY>755</locationY>
         <assignmentItems>
             <assignToReference>OCRCount</assignToReference>
             <operator>AssignCount</operator>
@@ -21,12 +21,12 @@
         <description>Defaults to Opportunity Created Date if blank</description>
         <name>ActiveWindowStartDate</name>
         <dataType>Date</dataType>
-        <expression>IF(ISNULL($CustomMetadata.N_Days__mdt.Master.Active_Contact_Window__c), DATEVALUE({!$Record.CreatedDate}),{!ActiveWindowStartSubFormula})</expression>
+        <expression>IF(ISNULL({!Active_Contact_Window_Custom_Record.Number_of_Days__c}), DATEVALUE({!$Record.CreatedDate}),{!ActiveWindowStartSubFormula})</expression>
     </formulas>
     <formulas>
         <name>ActiveWindowStartSubFormula</name>
         <dataType>Date</dataType>
-        <expression>{!$Record.CloseDate} - {!$CustomMetadata.N_Days__mdt.Master.Active_Contact_Window__c}</expression>
+        <expression>{!$Record.CloseDate} - {!Active_Contact_Window_Custom_Record.Number_of_Days__c}</expression>
     </formulas>
     <formulas>
         <description>Checks if Last Activity Date is between N Days ago and Close Date</description>
@@ -56,10 +56,32 @@
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <recordLookups>
+        <description>This is the record holding N days specific to Active Contact Window</description>
+        <name>Active_Contact_Window_Custom_Record</name>
+        <label>Active Contact Window Custom Record</label>
+        <locationX>176</locationX>
+        <locationY>323</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Get_All_Opp_OCRs</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Name</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Active Contact Window</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>NDays__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
         <name>Get_Active_Contacts</name>
         <label>Get Active Contacts</label>
         <locationX>176</locationX>
-        <locationY>539</locationY>
+        <locationY>647</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Set_OCRCount</targetReference>
@@ -87,7 +109,7 @@
         <name>Get_All_Opp_OCRs</name>
         <label>Get All Opp OCRs</label>
         <locationX>176</locationX>
-        <locationY>323</locationY>
+        <locationY>431</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>ContactIds</targetReference>
@@ -108,7 +130,7 @@
         <locationX>50</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Get_All_Opp_OCRs</targetReference>
+            <targetReference>Active_Contact_Window_Custom_Record</targetReference>
         </connector>
         <doesRequireRecordChangedToMeetCriteria>true</doesRequireRecordChangedToMeetCriteria>
         <filterFormula>{!$Record.IsClosed} &amp;&amp; ({!$CustomMetadata.Toggle_Switch__mdt.Master.All_Switch__c} || {!$CustomMetadata.Toggle_Switch__mdt.Master.Opportunity_Count_Active_OCRs__c})</filterFormula>
@@ -122,7 +144,7 @@
         <name>ContactIds</name>
         <label>ContactIds</label>
         <locationX>176</locationX>
-        <locationY>431</locationY>
+        <locationY>539</locationY>
         <connector>
             <targetReference>Get_Active_Contacts</targetReference>
         </connector>
