@@ -5,11 +5,11 @@
         <name>Add_Quotes_to_Collection</name>
         <label>Add Quotes to Collection</label>
         <locationX>182</locationX>
-        <locationY>1055</locationY>
+        <locationY>1163</locationY>
         <actionName>AddQuotesToFields</actionName>
         <actionType>apex</actionType>
         <connector>
-            <targetReference>SOQL_for_Active_Contacts</targetReference>
+            <targetReference>Get_Active_OCR_Count</targetReference>
         </connector>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
@@ -24,56 +24,55 @@
         <versionSegment>1</versionSegment>
     </actionCalls>
     <actionCalls>
-        <description>Custom SOQL query is needed, rather than standard Get Element because the LastActivityDate field is dynamic.</description>
-        <name>SOQL_for_Active_Contacts</name>
-        <label>SOQL for Active Contacts</label>
+        <name>Get_Active_OCR_Count</name>
+        <label>Get Active OCR Count</label>
         <locationX>182</locationX>
-        <locationY>1163</locationY>
-        <actionName>ExecuteSOQL</actionName>
+        <locationY>1271</locationY>
+        <actionName>ActiveOCRCount</actionName>
         <actionType>apex</actionType>
         <connector>
-            <targetReference>Set_OCRCount</targetReference>
+            <targetReference>Update_Active_OCRs</targetReference>
         </connector>
-        <dataTypeMappings>
-            <typeName>U__sObjects</typeName>
-            <typeValue>Contact</typeValue>
-        </dataTypeMappings>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
-            <name>soqlQuery</name>
+            <name>ActiveWindowStartDateSOQL</name>
             <value>
-                <elementReference>SOQLBody</elementReference>
+                <elementReference>ActiveWindowStartDateSOQL</elementReference>
             </value>
         </inputParameters>
-        <nameSegment>ExecuteSOQL</nameSegment>
+        <inputParameters>
+            <name>CloseDateSOQL</name>
+            <value>
+                <elementReference>CloseDateSOQL</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>fieldString</name>
+            <value>
+                <elementReference>ContactIds</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>LastActivityDateAPIName</name>
+            <value>
+                <elementReference>LastActivityDateAPIName</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>ActiveOCRCount</nameSegment>
         <offset>0</offset>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
+        <outputParameters>
+            <assignToReference>OCRCount</assignToReference>
+            <name>count</name>
+        </outputParameters>
         <versionSegment>1</versionSegment>
     </actionCalls>
     <apiVersion>62.0</apiVersion>
-    <assignments>
-        <description>Sums Active Contacts from Get Records and Assigns to OCRCount</description>
-        <name>Set_OCRCount</name>
-        <label>Set OCRCount</label>
-        <locationX>182</locationX>
-        <locationY>1271</locationY>
-        <assignmentItems>
-            <assignToReference>OCRCount</assignToReference>
-            <operator>AssignCount</operator>
-            <value>
-                <elementReference>Get_Active_Contacts</elementReference>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Get_Active_Contacts</targetReference>
-        </connector>
-    </assignments>
     <assignments>
         <description>Updates the API name of the field if it already exists.</description>
         <name>Update_LastActivityDateAPIName</name>
         <label>Update LastActivityDateAPIName</label>
         <locationX>50</locationX>
-        <locationY>647</locationY>
+        <locationY>755</locationY>
         <assignmentItems>
             <assignToReference>LastActivityDateAPIName</assignToReference>
             <operator>Assign</operator>
@@ -85,11 +84,27 @@
             <targetReference>Get_All_Opp_OCRs</targetReference>
         </connector>
     </assignments>
+    <assignments>
+        <name>View_Number_of_Days</name>
+        <label>View Number of Days</label>
+        <locationX>182</locationX>
+        <locationY>431</locationY>
+        <assignmentItems>
+            <assignToReference>NOD</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Active_Contact_Window_Custom_Record.Number_of_Days__c</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Get_Last_Activity_Date_Custom_Setting</targetReference>
+        </connector>
+    </assignments>
     <decisions>
         <name>Check_for_Last_Activity_Date_Record</name>
         <label>Check for Last Activity Date Record</label>
         <locationX>182</locationX>
-        <locationY>539</locationY>
+        <locationY>647</locationY>
         <defaultConnector>
             <targetReference>Create_Last_Activity_Date_Record</targetReference>
         </defaultConnector>
@@ -119,20 +134,24 @@
         <expression>IF(ISNULL({!Active_Contact_Window_Custom_Record.Number_of_Days__c}), DATEVALUE({!$Record.CreatedDate}),{!ActiveWindowStartSubFormula})</expression>
     </formulas>
     <formulas>
+        <name>ActiveWindowStartDateSOQL</name>
+        <dataType>String</dataType>
+        <expression>TEXT(YEAR({!ActiveWindowStartDate})) + &apos;-&apos; + TEXT(MONTH({!ActiveWindowStartDate})) + &apos;-&apos; + TEXT(DAY({!ActiveWindowStartDate}))</expression>
+    </formulas>
+    <formulas>
         <name>ActiveWindowStartSubFormula</name>
         <dataType>Date</dataType>
         <expression>{!$Record.CloseDate} - {!Active_Contact_Window_Custom_Record.Number_of_Days__c}</expression>
     </formulas>
     <formulas>
-        <name>DateFormula</name>
-        <dataType>Date</dataType>
-        <expression>{!$Record.CloseDate}</expression>
+        <name>CloseDateSOQL</name>
+        <dataType>String</dataType>
+        <expression>TEXT(YEAR({!$Record.CloseDate})) + &apos;-&apos; + TEXT(MONTH({!$Record.CloseDate})) + &apos;-&apos; + TEXT(DAY({!$Record.CloseDate}))</expression>
     </formulas>
     <formulas>
-        <description>Checks if Last Activity Date is between N Days ago and Close Date</description>
-        <name>isActive</name>
-        <dataType>Boolean</dataType>
-        <expression>{!$Record.IsWon}</expression>
+        <name>Today</name>
+        <dataType>Date</dataType>
+        <expression>Today()</expression>
     </formulas>
     <interviewLabel>Opportunity | Count Active Contacts when Closed {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Opportunity | Count Active Contacts when Closed</label>
@@ -163,57 +182,25 @@
         <locationY>323</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>Get_Last_Activity_Date_Custom_Setting</targetReference>
+            <targetReference>View_Number_of_Days</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
-            <field>Name</field>
+            <field>DeveloperName</field>
             <operator>EqualTo</operator>
             <value>
-                <stringValue>Active Contact Window</stringValue>
+                <stringValue>Active_Contact_Window</stringValue>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>NDays__c</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </recordLookups>
-    <recordLookups>
-        <name>Get_Active_Contacts</name>
-        <label>Get Active Contacts</label>
-        <locationX>182</locationX>
-        <locationY>1379</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>LastActivityDate</field>
-            <operator>LessThanOrEqualTo</operator>
-            <value>
-                <elementReference>$Record.CloseDate</elementReference>
-            </value>
-        </filters>
-        <filters>
-            <field>LastActivityDate</field>
-            <operator>GreaterThanOrEqualTo</operator>
-            <value>
-                <elementReference>ActiveWindowStartDate</elementReference>
-            </value>
-        </filters>
-        <filters>
-            <field>Id</field>
-            <operator>In</operator>
-            <value>
-                <elementReference>ContactIds</elementReference>
-            </value>
-        </filters>
-        <getFirstRecordOnly>false</getFirstRecordOnly>
-        <object>Contact</object>
+        <object>N_Days__mdt</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
         <name>Get_All_Opp_OCRs</name>
         <label>Get All Opp OCRs</label>
         <locationX>182</locationX>
-        <locationY>839</locationY>
+        <locationY>947</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>ContactIds</targetReference>
@@ -235,7 +222,7 @@
         <name>Get_Last_Activity_Date_Custom_Setting</name>
         <label>Get Last Activity Date Custom Setting</label>
         <locationX>182</locationX>
-        <locationY>431</locationY>
+        <locationY>539</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Check_for_Last_Activity_Date_Record</targetReference>
@@ -252,6 +239,19 @@
         <object>Acoustic_Report_Settings__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <recordUpdates>
+        <name>Update_Active_OCRs</name>
+        <label>Update Active OCRs</label>
+        <locationX>182</locationX>
+        <locationY>1379</locationY>
+        <inputAssignments>
+            <field>Active_OCRs__c</field>
+            <value>
+                <elementReference>OCRCount</elementReference>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
     <start>
         <locationX>56</locationX>
         <locationY>0</locationY>
@@ -270,7 +270,7 @@
         <name>Create_Last_Activity_Date_Record</name>
         <label>Create Last Activity Date Record</label>
         <locationX>314</locationX>
-        <locationY>647</locationY>
+        <locationY>755</locationY>
         <connector>
             <targetReference>Get_All_Opp_OCRs</targetReference>
         </connector>
@@ -280,14 +280,14 @@
     <textTemplates>
         <name>SOQLBody</name>
         <isViewedAsPlainText>true</isViewedAsPlainText>
-        <text>select id from Contact where {!LastActivityDateAPIName} &lt;= 2024-12-01 AND Id IN ({!Add_Quotes_to_Collection.fieldString})</text>
+        <text>select Id from Contact where {!LastActivityDateAPIName}  &gt;= {!ActiveWindowStartDateSOQL} AND {!LastActivityDateAPIName} &lt;= {!CloseDateSOQL} AND Id IN ({!Add_Quotes_to_Collection.fieldString})</text>
     </textTemplates>
     <transforms>
         <description>Extracts Contact Ids from OCR collection</description>
         <name>ContactIds</name>
         <label>ContactIds</label>
         <locationX>182</locationX>
-        <locationY>947</locationY>
+        <locationY>1055</locationY>
         <connector>
             <targetReference>Add_Quotes_to_Collection</targetReference>
         </connector>
@@ -318,8 +318,16 @@
         <isInput>false</isInput>
         <isOutput>false</isOutput>
         <value>
-            <stringValue>LastActivityDate</stringValue>
+            <stringValue>Last_Activity_Date__c</stringValue>
         </value>
+    </variables>
+    <variables>
+        <name>NOD</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
     </variables>
     <variables>
         <name>OCRCount</name>
