@@ -32,6 +32,28 @@
         <locationY>134</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
+            <targetReference>Get_Last_Activity_Date_Custom_Setting_Record</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>DeveloperName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Active_Contact_Window</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>N_Days__mdt</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <description>Custom Setting Record that holds the API name of the field used to hold Last Activity.  Defaults to package custom field of Last_Activity_Date__c.   Using a product like SalesLoft or Outreach would require a different field.</description>
+        <name>Get_Last_Activity_Date_Custom_Setting_Record</name>
+        <label>Get Last Activity Date Custom Setting Record</label>
+        <locationX>176</locationX>
+        <locationY>242</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
             <targetReference>Set_Custom_Settings_Screen</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
@@ -39,35 +61,35 @@
             <field>Name</field>
             <operator>EqualTo</operator>
             <value>
-                <stringValue>Active Contact Window</stringValue>
+                <stringValue>Last Activity Date</stringValue>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>NDays__c</object>
+        <object>Acoustic_Report_Settings__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordUpdates>
         <description>Commit changes.</description>
-        <name>Update_Active_Contact_Window</name>
-        <label>Update Active Contact Window</label>
+        <name>Update_Last_Activity_Field</name>
+        <label>Update Last Activity Field</label>
         <locationX>176</locationX>
-        <locationY>458</locationY>
-        <inputReference>Get_Active_Contact_Window</inputReference>
+        <locationY>566</locationY>
+        <inputReference>Get_Last_Activity_Date_Custom_Setting_Record</inputReference>
     </recordUpdates>
     <screens>
         <name>Confirmation_Screen</name>
         <label>Confirmation Screen</label>
         <locationX>176</locationX>
-        <locationY>350</locationY>
+        <locationY>458</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
         <connector>
-            <targetReference>Update_Active_Contact_Window</targetReference>
+            <targetReference>Update_Last_Activity_Field</targetReference>
         </connector>
         <fields>
             <name>ConfirmationText</name>
-            <fieldText>&lt;p&gt;Would you like to set the Active Contact Window to &lt;strong&gt;{!Get_Active_Contact_Window.Number_of_Days__c}&lt;/strong&gt; days?&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;Would you like to set the API Name for the Contact last activity date field to &lt;strong&gt;{!Get_Last_Activity_Date_Custom_Setting_Record.Field_API_Name__c}&lt;/strong&gt;?&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
@@ -78,7 +100,7 @@
         <name>Set_Custom_Settings_Screen</name>
         <label>Set Custom Settings Screen</label>
         <locationX>176</locationX>
-        <locationY>242</locationY>
+        <locationY>350</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -98,7 +120,7 @@
                 <fieldType>Region</fieldType>
                 <fields>
                     <name>Active_Contact_Window_text</name>
-                    <fieldText>&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Active Contact Window&lt;/strong&gt;&lt;/p&gt;</fieldText>
+                    <fieldText>&lt;p&gt;&lt;strong&gt;Active Contact Window - &lt;/strong&gt;lookback period from Opportunity Close Date for which a Contact is considered active.  If left blank, defaults to Opportunity Created Date.&lt;/p&gt;&lt;p&gt;Changes must be made via Custom Metadata/N Data/Manage Records.&lt;/p&gt;</fieldText>
                     <fieldType>DisplayText</fieldType>
                 </fields>
                 <inputParameters>
@@ -113,10 +135,48 @@
                 <name>Set_Custom_Settings_Screen_Section1_Column2</name>
                 <fieldType>Region</fieldType>
                 <fields>
+                    <name>Active_Contact_Window_displaytext</name>
+                    <fieldText>&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;{!Get_Active_Contact_Window.Number_of_Days__c}&lt;/strong&gt;&lt;/p&gt;</fieldText>
+                    <fieldType>DisplayText</fieldType>
+                </fields>
+                <inputParameters>
+                    <name>width</name>
+                    <value>
+                        <stringValue>6</stringValue>
+                    </value>
+                </inputParameters>
+                <isRequired>false</isRequired>
+            </fields>
+            <isRequired>false</isRequired>
+            <regionContainerType>SectionWithoutHeader</regionContainerType>
+        </fields>
+        <fields>
+            <name>Set_Custom_Settings_Screen_Section2</name>
+            <fieldType>RegionContainer</fieldType>
+            <fields>
+                <name>Set_Custom_Settings_Screen_Section2_Column1</name>
+                <fieldType>Region</fieldType>
+                <fields>
+                    <name>LastActivityDate_displaytext</name>
+                    <fieldText>&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Last Activity Date Field - &lt;/strong&gt;the field used to capture a Contact&apos;s last activity.&lt;/p&gt;</fieldText>
+                    <fieldType>DisplayText</fieldType>
+                </fields>
+                <inputParameters>
+                    <name>width</name>
+                    <value>
+                        <stringValue>6</stringValue>
+                    </value>
+                </inputParameters>
+                <isRequired>false</isRequired>
+            </fields>
+            <fields>
+                <name>Set_Custom_Settings_Screen_Section2_Column2</name>
+                <fieldType>Region</fieldType>
+                <fields>
                     <fieldType>ObjectProvided</fieldType>
                     <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
-                    <objectFieldReference>Get_Active_Contact_Window.Number_of_Days__c</objectFieldReference>
+                    <objectFieldReference>Get_Last_Activity_Date_Custom_Setting_Record.Field_API_Name__c</objectFieldReference>
                 </fields>
                 <inputParameters>
                     <name>width</name>

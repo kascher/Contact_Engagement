@@ -258,8 +258,7 @@
         <connector>
             <targetReference>Active_Contact_Window_Custom_Record</targetReference>
         </connector>
-        <doesRequireRecordChangedToMeetCriteria>true</doesRequireRecordChangedToMeetCriteria>
-        <filterFormula>{!$Record.IsClosed} &amp;&amp; ({!$CustomMetadata.Toggle_Switch__mdt.Master.All_Switch__c} || {!$CustomMetadata.Toggle_Switch__mdt.Master.Opportunity_Count_Active_OCRs__c})</filterFormula>
+        <filterFormula>ISCHANGED({!$Record.StageName}) &amp;&amp; ({!$CustomMetadata.Toggle_Switch__mdt.Master.All_Switch__c} || {!$CustomMetadata.Toggle_Switch__mdt.Master.Opportunity_Count_Active_OCRs__c})</filterFormula>
         <object>Opportunity</object>
         <recordTriggerType>Update</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
