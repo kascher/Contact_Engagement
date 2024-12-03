@@ -4,7 +4,7 @@
       "versionName": "ver 0.1",
       "versionNumber": "0.1.0.NEXT",
       "path": "force-app",
-      "default": false,
+      "default": true,
       "package": "Advanced Analytics",
       "versionDescription": "Advanced sales, success, and marketing reports with supporting customizations"
     }
