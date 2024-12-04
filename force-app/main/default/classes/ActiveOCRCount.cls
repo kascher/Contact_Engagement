@@ -1,7 +1,7 @@
-public with sharing class ActiveOCRCount {
+global without sharing class ActiveOCRCount {
     
     @InvocableMethod(label='Get Active OCR Count' description='Counts the number of Contacts within the specified date range and ID collection.')
-    public static List<ActiveOCRCountResult> countContactsByDateRange(List<ActiveOCRCountInput> inputs) {
+    global static List<ActiveOCRCountResult> countContactsByDateRange(List<ActiveOCRCountInput> inputs) {
         // Prepare results list
         List<ActiveOCRCountResult> results = new List<ActiveOCRCountResult>();
 
@@ -49,26 +49,26 @@ public with sharing class ActiveOCRCount {
     }
     
     // Input Wrapper Class
-    public class ActiveOCRCountInput {
+    global class ActiveOCRCountInput {
         @InvocableVariable(required=true label='Last Activity Date API Name' description='API Name of the field tracking last activity date')
-        public String LastActivityDateAPIName;
+        global String LastActivityDateAPIName;
         
         @InvocableVariable(required=true label='Active Window Start Date SOQL' description='Start date of the active window in SOQL format (YYYY-MM-DD)')
-        public String ActiveWindowStartDateSOQL;
+        global String ActiveWindowStartDateSOQL;
         
         @InvocableVariable(required=true label='Close Date SOQL' description='End date of the active window in SOQL format (YYYY-MM-DD)')
-        public String CloseDateSOQL;
+        global String CloseDateSOQL;
         
         @InvocableVariable(required=true label='Field String (Contact IDs)' description='List of Contact IDs to include in the query')
-        public List<Id> fieldString; // This remains a List<Id>
+        global List<Id> fieldString; // This remains a List<Id>
     }
     
     // Output Wrapper Class
-    public class ActiveOCRCountResult {
+    global class ActiveOCRCountResult {
         @InvocableVariable(label='Contact Count' description='The number of Contacts matching the query criteria')
-        public Integer count;
+        global Integer count;
         
-        public ActiveOCRCountResult(Integer count) {
+        global ActiveOCRCountResult(Integer count) {
             this.count = count;
         }
     }
