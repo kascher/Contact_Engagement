@@ -123,11 +123,7 @@
         <field>BucketField_34881713</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Multi-threading Impact Report</name>
-    <params>
-        <name>terr</name>
-        <value>all</value>
-    </params>
+    <name>Multi-threading Closed Won Impact Report</name>
     <params>
         <name>include</name>
         <value>closed</value>

@@ -5,8 +5,8 @@
       "versionNumber": "0.1.0.NEXT",
       "path": "force-app",
       "default": true,
-      "package": "Advanced Analytics",
-      "versionDescription": "Advanced sales, success, and marketing reports with supporting customizations"
+      "package": "Pipeline Analytics",
+      "versionDescription": "Reports, dashboards, and supporting customizations from AcousticSelling designed for sales, marketing, and customer success teams."
     }
   ],
   "name": "Contact_Engagement",
@@ -14,6 +14,6 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "62.0",
   "packageAliases": {
-    "Advanced Analytics": "0HoUR00000000w50AA"
+    "Pipeline Analytics": "0HoUR00000000xh0AA"
   }
 }
