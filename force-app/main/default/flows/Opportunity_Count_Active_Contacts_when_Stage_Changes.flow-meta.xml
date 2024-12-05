@@ -5,7 +5,7 @@
         <name>Add_Quotes_to_Collection</name>
         <label>Add Quotes to Collection</label>
         <locationX>182</locationX>
-        <locationY>1163</locationY>
+        <locationY>1055</locationY>
         <actionName>AddQuotesToFields</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -27,7 +27,7 @@
         <name>Get_Active_OCR_Count</name>
         <label>Get Active OCR Count</label>
         <locationX>182</locationX>
-        <locationY>1271</locationY>
+        <locationY>1163</locationY>
         <actionName>ActiveOCRCount</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -72,7 +72,7 @@
         <name>Update_LastActivityDateAPIName</name>
         <label>Update LastActivityDateAPIName</label>
         <locationX>50</locationX>
-        <locationY>755</locationY>
+        <locationY>647</locationY>
         <assignmentItems>
             <assignToReference>LastActivityDateAPIName</assignToReference>
             <operator>Assign</operator>
@@ -84,27 +84,11 @@
             <targetReference>Get_All_Opp_OCRs</targetReference>
         </connector>
     </assignments>
-    <assignments>
-        <name>View_Number_of_Days</name>
-        <label>View Number of Days</label>
-        <locationX>182</locationX>
-        <locationY>431</locationY>
-        <assignmentItems>
-            <assignToReference>NOD</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>Active_Contact_Window_Custom_Record.Number_of_Days__c</elementReference>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Get_Last_Activity_Date_Custom_Setting</targetReference>
-        </connector>
-    </assignments>
     <decisions>
         <name>Check_for_Last_Activity_Date_Record</name>
         <label>Check for Last Activity Date Record</label>
         <locationX>182</locationX>
-        <locationY>647</locationY>
+        <locationY>539</locationY>
         <defaultConnector>
             <targetReference>Create_Last_Activity_Date_Record</targetReference>
         </defaultConnector>
@@ -125,13 +109,13 @@
             <label>Record Exists, Keep Going</label>
         </rules>
     </decisions>
-    <description>When Opp moved to Closed Lost or Closed won, sum Opportunity Contact Roles with Last Activity Date between Opportunity Creation Date and Closed Date.</description>
+    <description>When Opp stage changes, count Opportunity Contact Roles with Last Activity Date between Opportunity Creation Date and Closed Date or within N day lookback window.</description>
     <environments>Default</environments>
     <formulas>
         <description>Defaults to Opportunity Created Date if blank</description>
         <name>ActiveWindowStartDate</name>
         <dataType>Date</dataType>
-        <expression>IF(ISNULL({!Active_Contact_Window_Custom_Record.Number_of_Days__c}), DATEVALUE({!$Record.CreatedDate}),{!ActiveWindowStartSubFormula})</expression>
+        <expression>IF(ISNULL({!NOD}), DATEVALUE({!$Record.CreatedDate}),{!ActiveWindowStartSubFormula})</expression>
     </formulas>
     <formulas>
         <name>ActiveWindowStartDateSOQL</name>
@@ -141,7 +125,7 @@
     <formulas>
         <name>ActiveWindowStartSubFormula</name>
         <dataType>Date</dataType>
-        <expression>{!$Record.CloseDate} - {!Active_Contact_Window_Custom_Record.Number_of_Days__c}</expression>
+        <expression>{!$Record.CloseDate} - {!NOD}</expression>
     </formulas>
     <formulas>
         <name>CloseDateSOQL</name>
@@ -153,8 +137,8 @@
         <dataType>Date</dataType>
         <expression>Today()</expression>
     </formulas>
-    <interviewLabel>Opportunity | Count Active Contacts when Closed {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>Opportunity | Count Active Contacts when Closed</label>
+    <interviewLabel>Opportunity | Count Active Contacts when Stage Changes {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Opportunity | Count Active Contacts when Stage Changes</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -182,7 +166,7 @@
         <locationY>323</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>View_Number_of_Days</targetReference>
+            <targetReference>Get_Last_Activity_Date_Custom_Setting</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -192,15 +176,17 @@
                 <stringValue>Active_Contact_Window</stringValue>
             </value>
         </filters>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
         <object>N_Days__mdt</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
+        <outputAssignments>
+            <assignToReference>NOD</assignToReference>
+            <field>Number_of_Days__c</field>
+        </outputAssignments>
     </recordLookups>
     <recordLookups>
         <name>Get_All_Opp_OCRs</name>
         <label>Get All Opp OCRs</label>
         <locationX>182</locationX>
-        <locationY>947</locationY>
+        <locationY>839</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>ContactIds</targetReference>
@@ -222,7 +208,7 @@
         <name>Get_Last_Activity_Date_Custom_Setting</name>
         <label>Get Last Activity Date Custom Setting</label>
         <locationX>182</locationX>
-        <locationY>539</locationY>
+        <locationY>431</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Check_for_Last_Activity_Date_Record</targetReference>
@@ -243,7 +229,7 @@
         <name>Update_Active_OCRs</name>
         <label>Update Active OCRs</label>
         <locationX>182</locationX>
-        <locationY>1379</locationY>
+        <locationY>1271</locationY>
         <inputAssignments>
             <field>Active_OCRs__c</field>
             <value>
@@ -263,13 +249,13 @@
         <recordTriggerType>Update</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
     <subflows>
         <description>Creates the Custom Setting Record if it doesn&apos;t exist</description>
         <name>Create_Last_Activity_Date_Record</name>
         <label>Create Last Activity Date Record</label>
         <locationX>314</locationX>
-        <locationY>755</locationY>
+        <locationY>647</locationY>
         <connector>
             <targetReference>Get_All_Opp_OCRs</targetReference>
         </connector>
@@ -286,7 +272,7 @@
         <name>ContactIds</name>
         <label>ContactIds</label>
         <locationX>182</locationX>
-        <locationY>1055</locationY>
+        <locationY>947</locationY>
         <connector>
             <targetReference>Add_Quotes_to_Collection</targetReference>
         </connector>
