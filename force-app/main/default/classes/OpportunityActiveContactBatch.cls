@@ -100,7 +100,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
     }
 
     // Invocable Method to execute this batch
-    @InvocableMethod(label='Run Opportunity Active Contact Batch' description='Runs the batch process for updating Opportunities with active OCR counts.')
+    @InvocableMethod(label='Count Active OCRs Batch' description='Runs the batch process for updating Opportunities with active OCR counts.'category = 'Opportunity')
     public static void runBatch(List<BatchInput> inputs) {
         // Use the first input (Flow will typically provide only one)
         if (!inputs.isEmpty()) {
@@ -123,7 +123,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         @InvocableVariable(label='Number of Days (Lookback)' description='The number of days to look back from CloseDate' required=true)
         public Integer nod;
 
-        @InvocableVariable(label='Start Date (SOQL Date)' description='The start date to filter closed Opportunities' required=true)
+        @InvocableVariable(label='Analysis Start Date' description='The date to begin the analysis' required=true)
         public Date SOQLDate;
     }
 }

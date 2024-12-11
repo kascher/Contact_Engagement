@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>62.0</apiVersion>
+    <assignments>
+        <name>Set_Last_Activity_Field</name>
+        <label>Set Last Activity Field</label>
+        <locationX>176</locationX>
+        <locationY>566</locationY>
+        <assignmentItems>
+            <assignToReference>Get_Last_Activity_Date_Custom_Setting_Record.Field_API_Name__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Field_API_Name</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Commit_Last_Activity_Field</targetReference>
+        </connector>
+    </assignments>
     <description>Admin screen flow for Acousticselling-created settings.</description>
     <environments>Default</environments>
     <interviewLabel>Report Settings Screen Flow {!$Flow.CurrentDateTime}</interviewLabel>
@@ -70,10 +86,10 @@
     </recordLookups>
     <recordUpdates>
         <description>Commit changes.</description>
-        <name>Update_Last_Activity_Field</name>
-        <label>Update Last Activity Field</label>
+        <name>Commit_Last_Activity_Field</name>
+        <label>Commit Last Activity Field</label>
         <locationX>176</locationX>
-        <locationY>566</locationY>
+        <locationY>674</locationY>
         <inputReference>Get_Last_Activity_Date_Custom_Setting_Record</inputReference>
     </recordUpdates>
     <screens>
@@ -85,7 +101,7 @@
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
         <connector>
-            <targetReference>Update_Last_Activity_Field</targetReference>
+            <targetReference>Set_Last_Activity_Field</targetReference>
         </connector>
         <fields>
             <name>ConfirmationText</name>
@@ -101,6 +117,32 @@
         <label>Set Custom Settings Screen</label>
         <locationX>176</locationX>
         <locationY>350</locationY>
+        <actions>
+            <name>Batch_Active_OCR_Subflow</name>
+            <actionName>asreporting__Batch_Active_OCR_Subflow</actionName>
+            <actionType>flow</actionType>
+            <inputParameters>
+                <name>AnalysisStartDate</name>
+                <value>
+                    <elementReference>Start_Date</elementReference>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>LastActivityDateAPI</name>
+                <value>
+                    <elementReference>Field_API_Name</elementReference>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>NumberOfDays</name>
+                <value>
+                    <elementReference>Get_Active_Contact_Window.Number_of_Days__c</elementReference>
+                </value>
+            </inputParameters>
+            <label>Batch Active OCR Subflow</label>
+            <nameSegment>asreporting__Batch_Active_OCR_Subflow</nameSegment>
+            <versionSegment>1</versionSegment>
+        </actions>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -173,10 +215,15 @@
                 <name>Set_Custom_Settings_Screen_Section2_Column2</name>
                 <fieldType>Region</fieldType>
                 <fields>
-                    <fieldType>ObjectProvided</fieldType>
+                    <name>Field_API_Name</name>
+                    <dataType>String</dataType>
+                    <defaultValue>
+                        <stringValue>asreporting__Last_Activity_Date__c</stringValue>
+                    </defaultValue>
+                    <fieldText>Field API Name</fieldText>
+                    <fieldType>InputField</fieldType>
                     <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
-                    <objectFieldReference>Get_Last_Activity_Date_Custom_Setting_Record.Field_API_Name__c</objectFieldReference>
                 </fields>
                 <inputParameters>
                     <name>width</name>
@@ -189,8 +236,103 @@
             <isRequired>false</isRequired>
             <regionContainerType>SectionWithoutHeader</regionContainerType>
         </fields>
+        <fields>
+            <name>Set_Custom_Settings_Screen_Section3</name>
+            <fieldType>RegionContainer</fieldType>
+            <fields>
+                <name>Set_Custom_Settings_Screen_Section3_Column1</name>
+                <fieldType>Region</fieldType>
+                <fields>
+                    <name>BackfillDisplayText</name>
+                    <fieldText>&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Backfill the Active Opportunity Contact Count &lt;/strong&gt;for closed opportunities going back to the selected date.&lt;/p&gt;</fieldText>
+                    <fieldType>DisplayText</fieldType>
+                </fields>
+                <inputParameters>
+                    <name>width</name>
+                    <value>
+                        <stringValue>4</stringValue>
+                    </value>
+                </inputParameters>
+                <isRequired>false</isRequired>
+            </fields>
+            <fields>
+                <name>Set_Custom_Settings_Screen_Section3_Column2</name>
+                <fieldType>Region</fieldType>
+                <fields>
+                    <name>Start_Date</name>
+                    <dataType>Date</dataType>
+                    <fieldText>Start Date</fieldText>
+                    <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
+                    <isRequired>false</isRequired>
+                </fields>
+                <inputParameters>
+                    <name>width</name>
+                    <value>
+                        <stringValue>4</stringValue>
+                    </value>
+                </inputParameters>
+                <isRequired>false</isRequired>
+            </fields>
+            <fields>
+                <name>Set_Custom_Settings_Screen_Section3_Column3</name>
+                <fieldType>Region</fieldType>
+                <fields>
+                    <name>BlankSpace</name>
+                    <fieldType>DisplayText</fieldType>
+                </fields>
+                <fields>
+                    <name>BackfillOCRButton</name>
+                    <extensionName>flowruntime:actionButtonField</extensionName>
+                    <fieldType>ComponentInstance</fieldType>
+                    <inputParameters>
+                        <name>label</name>
+                        <value>
+                            <stringValue>Calculate Now</stringValue>
+                        </value>
+                    </inputParameters>
+                    <inputParameters>
+                        <name>isSuccess</name>
+                        <value>
+                            <elementReference>Batch_Active_OCR_Subflow.IsSuccess</elementReference>
+                        </value>
+                    </inputParameters>
+                    <inputParameters>
+                        <name>inProgress</name>
+                        <value>
+                            <elementReference>Batch_Active_OCR_Subflow.InProgress</elementReference>
+                        </value>
+                    </inputParameters>
+                    <inputParameters>
+                        <name>errorMessage</name>
+                        <value>
+                            <elementReference>Batch_Active_OCR_Subflow.ErrorMessage</elementReference>
+                        </value>
+                    </inputParameters>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
+                    <isRequired>true</isRequired>
+                    <storeOutputAutomatically>true</storeOutputAutomatically>
+                </fields>
+                <inputParameters>
+                    <name>width</name>
+                    <value>
+                        <stringValue>4</stringValue>
+                    </value>
+                </inputParameters>
+                <isRequired>false</isRequired>
+            </fields>
+            <isRequired>false</isRequired>
+            <regionContainerType>SectionWithoutHeader</regionContainerType>
+        </fields>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
+        <triggers>
+            <eventName>flow__screenfieldclick</eventName>
+            <eventSource>BackfillOCRButton</eventSource>
+            <handlers>
+                <screenActionName>Batch_Active_OCR_Subflow</screenActionName>
+            </handlers>
+        </triggers>
     </screens>
     <start>
         <locationX>50</locationX>
@@ -199,5 +341,5 @@
             <targetReference>Get_Active_Contact_Window</targetReference>
         </connector>
     </start>
-    <status>Active</status>
+    <status>Draft</status>
 </Flow>
