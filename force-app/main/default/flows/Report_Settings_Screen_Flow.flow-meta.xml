@@ -341,5 +341,5 @@
             <targetReference>Get_Active_Contact_Window</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
 </Flow>
