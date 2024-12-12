@@ -47,7 +47,6 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         List<Opportunity> opportunitiesToUpdate = new List<Opportunity>();
         for (Opportunity opp : scope) {
             System.debug('Processing Opportunity with Id: ' + opp.Id);
-            System.debug('Opportunity asreporting__Active_OCRs__c (before update): ' + opp.asreporting__Active_OCRs__c);
 
             if (oppToOCRs.containsKey(opp.Id)) {
                 List<OpportunityContactRole> ocrs = oppToOCRs.get(opp.Id);
@@ -88,6 +87,26 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
     // Finish method to log results or perform final actions
     public void finish(Database.BatchableContext bc) {
         System.debug('Batch completed successfully.');
+
+        try {
+            // Get the ID of the AsyncApexJob representing this batch job from Database.BatchableContext.    
+            // Query the AsyncApexJob object to retrieve the current job's information.  
+            AsyncApexJob a = [
+                SELECT Id, Status, ExtendedStatus, NumberOfErrors, JobItemsProcessed, TotalJobItems, CreatedBy.Email
+                FROM AsyncApexJob WHERE Id = :bc.getJobId()
+            ];
+
+            // Send an email to the Apex job's submitter notifying of job completion.  
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+            String[] toAddresses = new String[] {a.CreatedBy.Email};
+            mail.setToAddresses(toAddresses);
+            mail.setSubject('Calculate Active Opp Contacts ' + a.Status);
+            mail.setPlainTextBody('The batch Apex job processed ' + a.TotalJobItems +
+                ' batches with ' + a.NumberOfErrors + ' failures. More info at Setup->Apex Jobs');
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[] {mail});
+        } catch (Exception e) {
+            System.debug('Error sending email: ' + e.getMessage());
+        }
     }
 
     // Helper method to calculate the active window start date
@@ -108,7 +127,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
     }
 
     // Invocable Method to execute this batch
-    @InvocableMethod(label='Run Opportunity Active Contact Batch' description='Runs the batch process for updating Opportunities with active OCR counts.')
+    @InvocableMethod(label='Count Active OCRs Batch' description='Runs the batch process for updating Opportunities with active OCR counts.' category='Opportunity')
     public static void runBatch(List<BatchInput> inputs) {
         // Use the first input (Flow will typically provide only one)
         if (!inputs.isEmpty()) {
