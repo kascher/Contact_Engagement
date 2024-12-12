@@ -1,8 +1,8 @@
 {
   "packageDirectories": [
     {
-      "versionName": "ver 0.1",
-      "versionNumber": "0.1.0.NEXT",
+      "versionName": "Internal ver 0.5.0.1",
+      "versionNumber": "0.5.0.NEXT",
       "path": "force-app",
       "default": true,
       "package": "Pipeline Analytics",

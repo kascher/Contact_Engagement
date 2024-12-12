@@ -14,10 +14,11 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
     // Start method to query all closed Opportunities on or after the specified date
     public Database.QueryLocator start(Database.BatchableContext bc) {
         // Query all closed Opportunities with CloseDate on or after the input SOQLDate
-        String query = 'SELECT Id, StageName, CreatedDate, CloseDate ' +
+        String query = 'SELECT Id, Name, StageName, CreatedDate, CloseDate ' +
                        'FROM Opportunity ' +
                        'WHERE IsClosed = true AND CloseDate >= :SOQLDate';
 
+        System.debug('Start Query: ' + query);
         return Database.getQueryLocator(query);
     }
 
@@ -45,6 +46,9 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         // Process each Opportunity
         List<Opportunity> opportunitiesToUpdate = new List<Opportunity>();
         for (Opportunity opp : scope) {
+            System.debug('Processing Opportunity with Id: ' + opp.Id);
+            System.debug('Opportunity asreporting__Active_OCRs__c (before update): ' + opp.asreporting__Active_OCRs__c);
+
             if (oppToOCRs.containsKey(opp.Id)) {
                 List<OpportunityContactRole> ocrs = oppToOCRs.get(opp.Id);
 
@@ -62,11 +66,14 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
                                lastActivityDateAPIName + ' <= :closeDateSOQL AND ' +
                                'Id IN :contactIds';
 
+                System.debug('Contact Query: ' + query);
+
                 // Query Contacts and count Active OCRs
                 Integer activeOCRCount = [SELECT COUNT() FROM Contact WHERE Id IN :contactIds];
 
                 // Update Opportunity with Active OCR count
                 opp.asreporting__Active_OCRs__c = activeOCRCount;
+                System.debug('Opportunity asreporting__Active_OCRs__c (after update): ' + opp.asreporting__Active_OCRs__c);
                 opportunitiesToUpdate.add(opp);
             }
         }
@@ -74,6 +81,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         // Update Opportunities
         if (!opportunitiesToUpdate.isEmpty()) {
             update opportunitiesToUpdate;
+            System.debug('Updated Opportunities: ' + opportunitiesToUpdate);
         }
     }
 
@@ -100,7 +108,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
     }
 
     // Invocable Method to execute this batch
-    @InvocableMethod(label='Count Active OCRs Batch' description='Runs the batch process for updating Opportunities with active OCR counts.'category = 'Opportunity')
+    @InvocableMethod(label='Run Opportunity Active Contact Batch' description='Runs the batch process for updating Opportunities with active OCR counts.')
     public static void runBatch(List<BatchInput> inputs) {
         // Use the first input (Flow will typically provide only one)
         if (!inputs.isEmpty()) {
@@ -123,7 +131,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         @InvocableVariable(label='Number of Days (Lookback)' description='The number of days to look back from CloseDate' required=true)
         public Integer nod;
 
-        @InvocableVariable(label='Analysis Start Date' description='The date to begin the analysis' required=true)
+        @InvocableVariable(label='Start Date (SOQL Date)' description='The start date to filter closed Opportunities' required=true)
         public Date SOQLDate;
     }
 }
