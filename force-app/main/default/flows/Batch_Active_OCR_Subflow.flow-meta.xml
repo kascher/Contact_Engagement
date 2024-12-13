@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionCalls>
-        <description>Calls a batch Apex class.</description>
+        <description>Runs an Invocable Batch class and returns the job results</description>
         <name>Run_Batch_Active_OCR_Count</name>
         <label>Run Batch Active OCR Count</label>
         <locationX>176</locationX>
         <locationY>134</locationY>
         <actionName>OpportunityActiveContactBatch</actionName>
         <actionType>apex</actionType>
+        <connector>
+            <targetReference>Set_Output_Variables</targetReference>
+        </connector>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
             <name>lastActivityDateAPIName</name>
@@ -29,9 +32,44 @@
         </inputParameters>
         <nameSegment>OpportunityActiveContactBatch</nameSegment>
         <offset>0</offset>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
         <versionSegment>1</versionSegment>
     </actionCalls>
     <apiVersion>62.0</apiVersion>
+    <assignments>
+        <name>Set_Output_Variables</name>
+        <label>Set Output Variables</label>
+        <locationX>176</locationX>
+        <locationY>242</locationY>
+        <assignmentItems>
+            <assignToReference>ErrorCount</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Run_Batch_Active_OCR_Count.errorCount</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>jobStatus</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Run_Batch_Active_OCR_Count.jobStatus</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>RecordsProcessed</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Run_Batch_Active_OCR_Count.recordsProcessed</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>TotalJobItems</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Run_Batch_Active_OCR_Count.totalJobItems</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
     <description>Called from Report Settings Screen Flow which in turn calls a batch Apex class to backfill Active Opportunity Contact Role counts to a specified start date.</description>
     <environments>Default</environments>
     <interviewLabel>Batch Active OCR Subflow {!$Flow.CurrentDateTime}</interviewLabel>
@@ -71,6 +109,21 @@
         <isOutput>false</isOutput>
     </variables>
     <variables>
+        <name>ErrorCount</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+        <scale>0</scale>
+    </variables>
+    <variables>
+        <name>jobStatus</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
         <name>LastActivityDateAPI</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
@@ -83,6 +136,22 @@
         <isCollection>false</isCollection>
         <isInput>true</isInput>
         <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+    <variables>
+        <name>RecordsProcessed</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+        <scale>0</scale>
+    </variables>
+    <variables>
+        <name>TotalJobItems</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
         <scale>0</scale>
     </variables>
 </Flow>

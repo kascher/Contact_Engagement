@@ -50,12 +50,20 @@ public class AccountsContactsOppsTasksDataGenerator {
         // Create Opportunities for each Account
         for (Account acc : accounts) {
             for (Integer i = 0; i < 5; i++) {
-                String stageName = (Math.mod(i, 2) == 0) ? 'Prospecting' : 'Closed Won';
-                Integer closeDays = (Math.mod(i, 2) == 0) ? 30 : -30;
+                String stageName;
+                if (Math.mod(i, 3) == 0) {
+                    stageName = 'Prospecting';
+                } else if (Math.mod(i, 3) == 1) {
+                    stageName = 'Closed Won';
+                } else {
+                    stageName = 'Closed Lost';
+                }
+                Integer closeDays = (stageName == 'Prospecting') ? 30 : -30;
                 Opportunity opp = new Opportunity(
                     Name = acc.Name + ' Opportunity ' + i,
                     StageName = stageName,
                     CloseDate = Date.today().addDays(closeDays),
+                    Amount = 10000,
                     AccountId = acc.Id
                 );
                 opportunities.add(opp);
