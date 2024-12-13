@@ -18,7 +18,7 @@
                 <elementReference>ContactIds</elementReference>
             </value>
         </inputParameters>
-        <nameSegment>asreporting__AddQuotesToFields</nameSegment>
+        <nameSegment>AddQuotesToFields</nameSegment>
         <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
         <versionSegment>1</versionSegment>
@@ -58,7 +58,7 @@
                 <elementReference>LastActivityDateAPIName</elementReference>
             </value>
         </inputParameters>
-        <nameSegment>asreporting__ActiveOCRCount</nameSegment>
+        <nameSegment>ActiveOCRCount</nameSegment>
         <offset>0</offset>
         <outputParameters>
             <assignToReference>OCRCount</assignToReference>
