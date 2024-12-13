@@ -155,7 +155,7 @@
         </fields>
         <fields>
             <name>Batch_Outputs</name>
-            <fieldText>&lt;p&gt;Error: {!Batch_Active_OCR_Subflow.Results.ErrorCount}&lt;/p&gt;&lt;p&gt;Records Processed {!Batch_Active_OCR_Subflow.Results.RecordsProcessed}&lt;/p&gt;&lt;p&gt;Total Job Items: {!Batch_Active_OCR_Subflow.Results.TotalJobItems}&lt;/p&gt;&lt;p&gt;Job Status {!Batch_Active_OCR_Subflow.Results.jobStatus}&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;Error: {!Batch_Active_OCR_Subflow.Results.ErrorCount}&lt;/p&gt;&lt;p&gt;Records Processed {!Batch_Active_OCR_Subflow.Results.RecordsProcessed}&lt;/p&gt;&lt;p&gt;Total Job Items: {!Batch_Active_OCR_Subflow.Results.TotalJobItems}&lt;/p&gt;&lt;p&gt;Job Status {!Batch_Active_OCR_Subflow.Results.jobStatus}&lt;/p&gt;&lt;p&gt;Jobid {!Batch_Active_OCR_Subflow.Results.JobId}&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
@@ -391,7 +391,7 @@
             <targetReference>Get_Active_Contact_Window</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
     <variables>
         <name>LastActivityDateRecord</name>
         <dataType>SObject</dataType>

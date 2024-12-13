@@ -17,6 +17,9 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
 
         @InvocableVariable(label='Total Job Items' description='The total number of job items processed by the batch job')
         public Integer totalJobItems;
+        
+        @InvocableVariable(label='JobId' description='Batch Job Id')
+        public String jobid;
     }
 
     public BatchOutput output = new BatchOutput();
@@ -114,6 +117,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
             output.jobStatus = a.Status;
             output.errorCount += a.NumberOfErrors;
             output.totalJobItems = a.TotalJobItems;
+            output.jobid = a.id;
 
             Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
             String[] toAddresses = new String[] {a.CreatedBy.Email};
