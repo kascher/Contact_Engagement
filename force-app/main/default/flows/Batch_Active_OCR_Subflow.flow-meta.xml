@@ -6,7 +6,7 @@
         <label>Run Batch Active OCR Count</label>
         <locationX>176</locationX>
         <locationY>134</locationY>
-        <actionName>OpportunityActiveContactBatch2</actionName>
+        <actionName>OpportunityActiveContactBatch</actionName>
         <actionType>apex</actionType>
         <connector>
             <targetReference>Set_Output_Variables</targetReference>
@@ -30,7 +30,7 @@
                 <elementReference>AnalysisStartDate</elementReference>
             </value>
         </inputParameters>
-        <nameSegment>OpportunityActiveContactBatch2</nameSegment>
+        <nameSegment>OpportunityActiveContactBatch</nameSegment>
         <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
         <versionSegment>1</versionSegment>

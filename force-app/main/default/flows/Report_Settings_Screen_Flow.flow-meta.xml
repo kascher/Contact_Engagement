@@ -44,6 +44,11 @@
     </decisions>
     <description>Admin screen flow for Acousticselling-created settings.</description>
     <environments>Default</environments>
+    <formulas>
+        <name>JobIdFormula</name>
+        <dataType>String</dataType>
+        <expression>MID({!Batch_Active_OCR_Subflow.Results.JobStatus}, FIND(&apos;Job ID: &apos;, {!Batch_Active_OCR_Subflow.Results.JobStatus}) + 8, 15)</expression>
+    </formulas>
     <interviewLabel>Report Settings Screen Flow {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Report Settings Screen Flow</label>
     <processMetadataValues>
@@ -142,6 +147,20 @@
         <label>Confirmation Screen</label>
         <locationX>182</locationX>
         <locationY>458</locationY>
+        <actions>
+            <name>Get_JobId_Status_Subflow</name>
+            <actionName>asreporting__Get_JobId_Status_Subflow</actionName>
+            <actionType>flow</actionType>
+            <inputParameters>
+                <name>jobId</name>
+                <value>
+                    <elementReference>JobIdFormula</elementReference>
+                </value>
+            </inputParameters>
+            <label>Get JobId Status Subflow</label>
+            <nameSegment>asreporting__Get_JobId_Status_Subflow</nameSegment>
+            <versionSegment>1</versionSegment>
+        </actions>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -155,11 +174,55 @@
         </fields>
         <fields>
             <name>Batch_Outputs</name>
-            <fieldText>&lt;p&gt;Error: {!Batch_Active_OCR_Subflow.Results.ErrorCount}&lt;/p&gt;&lt;p&gt;Records Processed {!Batch_Active_OCR_Subflow.Results.RecordsProcessed}&lt;/p&gt;&lt;p&gt;Total Job Items: {!Batch_Active_OCR_Subflow.Results.TotalJobItems}&lt;/p&gt;&lt;p&gt;Job Status {!Batch_Active_OCR_Subflow.Results.jobStatus}&lt;/p&gt;&lt;p&gt;Jobid {!Batch_Active_OCR_Subflow.Results.JobId}&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;Error: {!Batch_Active_OCR_Subflow.Results.ErrorCount}&lt;/p&gt;&lt;p&gt;Records Processed {!Batch_Active_OCR_Subflow.Results.RecordsProcessed}&lt;/p&gt;&lt;p&gt;Total Job Items: {!Batch_Active_OCR_Subflow.Results.TotalJobItems}&lt;/p&gt;&lt;p&gt;Job Status {!Batch_Active_OCR_Subflow.Results.jobStatus}&lt;/p&gt;&lt;p&gt;Jobid {!Batch_Active_OCR_Subflow.Results.JobId}&lt;/p&gt;&lt;p&gt;JobId Formula {!JobIdFormula}&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Check_Status</name>
+            <extensionName>flowruntime:actionButtonField</extensionName>
+            <fieldType>ComponentInstance</fieldType>
+            <inputParameters>
+                <name>label</name>
+                <value>
+                    <stringValue>Check Status</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>isSuccess</name>
+                <value>
+                    <elementReference>Get_JobId_Status_Subflow.IsSuccess</elementReference>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>inProgress</name>
+                <value>
+                    <elementReference>Get_JobId_Status_Subflow.InProgress</elementReference>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>errorMessage</name>
+                <value>
+                    <elementReference>Get_JobId_Status_Subflow.ErrorMessage</elementReference>
+                </value>
+            </inputParameters>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
+            <isRequired>true</isRequired>
+            <storeOutputAutomatically>true</storeOutputAutomatically>
+        </fields>
+        <fields>
+            <name>StatusText</name>
+            <fieldText>&lt;p&gt;{!Get_JobId_Status_Subflow.Results.JobStatus}&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
+        <triggers>
+            <eventName>flow__screenfieldclick</eventName>
+            <eventSource>Check_Status</eventSource>
+            <handlers>
+                <screenActionName>Get_JobId_Status_Subflow</screenActionName>
+            </handlers>
+        </triggers>
     </screens>
     <screens>
         <description>Admin Setup Screen.</description>
