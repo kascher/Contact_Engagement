@@ -1,5 +1,5 @@
 {
-  "orgName": "Demo company",
+  "orgName": "Contact Engagement",
   "edition": "enterprise",
   "features": ["EnableSetPasswordInApi", "LightningSalesConsole"],
   "hassampledata": true,

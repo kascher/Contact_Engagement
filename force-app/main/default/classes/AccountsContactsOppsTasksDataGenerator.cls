@@ -1,12 +1,43 @@
-public class AccountsContactsOppsTasksDataGenerator {
+/**
+ * @description This class generates sample data for Accounts, Contacts, Opportunities, and Tasks.
+ * @sharingModel with sharing
+ */
+public with sharing class AccountsContactsOppsTasksDataGenerator {
+
+    /**
+     * @description Creates state accounts with associated data.
+     */
     public static void createStateAccountsWithData() {
-        List<Account> accounts = new List<Account>();
-        List<Contact> contacts = new List<Contact>();
-        List<Opportunity> opportunities = new List<Opportunity>();
+        if (!Schema.sObjectType.Account.isCreateable()) {
+            System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Account records.');
+            return;
+        }
+
+        List<Account> accounts = createAccounts();
+        Map<Id, List<Contact>> accountContactsMap = createContacts(accounts);
+        List<Opportunity> opportunities = createOpportunities(accounts);
         List<OpportunityContactRole> contactRoles = new List<OpportunityContactRole>();
         List<Task> tasks = new List<Task>();
 
-        // List of US states
+        createOpportunityContactRolesAndTasks(opportunities, accountContactsMap, contactRoles, tasks);
+
+        // Insert Opportunity Contact Roles
+        if (Schema.sObjectType.OpportunityContactRole.isCreateable()) {
+            insert contactRoles;
+        } else {
+            System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create OpportunityContactRole records.');
+        }
+
+        // Insert Tasks
+        if (Schema.sObjectType.Task.isCreateable()) {
+            insert tasks;
+        } else {
+            System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Task records.');
+        }
+    }
+
+    private static List<Account> createAccounts() {
+        List<Account> accounts = new List<Account>();
         List<String> states = new List<String>{
             'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
             'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
@@ -17,17 +48,24 @@ public class AccountsContactsOppsTasksDataGenerator {
         };
 
         for (String state : states) {
-            // Create Account
             Account account = new Account(Name = state);
             accounts.add(account);
         }
 
-        // Insert Accounts
         insert accounts;
+        return accounts;
+    }
 
-        // Create Contacts for each Account
+    private static Map<Id, List<Contact>> createContacts(List<Account> accounts) {
+        List<Contact> contacts = new List<Contact>();
         Map<Id, List<Contact>> accountContactsMap = new Map<Id, List<Contact>>();
+
         for (Account acc : accounts) {
+            if (!Schema.sObjectType.Contact.isCreateable()) {
+                System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Contact records.');
+                continue;
+            }
+
             List<Contact> accountContacts = new List<Contact>();
             for (Integer i = 0; i < 5; i++) {
                 String firstName = 'Funny' + i;
@@ -44,11 +82,19 @@ public class AccountsContactsOppsTasksDataGenerator {
             accountContactsMap.put(acc.Id, accountContacts);
         }
 
-        // Insert Contacts
         insert contacts;
+        return accountContactsMap;
+    }
 
-        // Create Opportunities for each Account
+    private static List<Opportunity> createOpportunities(List<Account> accounts) {
+        List<Opportunity> opportunities = new List<Opportunity>();
+
         for (Account acc : accounts) {
+            if (!Schema.sObjectType.Opportunity.isCreateable()) {
+                System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Opportunity records.');
+                continue;
+            }
+
             for (Integer i = 0; i < 5; i++) {
                 String stageName;
                 if (Math.mod(i, 3) == 0) {
@@ -70,43 +116,48 @@ public class AccountsContactsOppsTasksDataGenerator {
             }
         }
 
-        // Insert Opportunities
         insert opportunities;
+        return opportunities;
+    }
 
-        // Create Opportunity Contact Roles and Tasks
+    private static void createOpportunityContactRolesAndTasks(List<Opportunity> opportunities, Map<Id, List<Contact>> accountContactsMap, List<OpportunityContactRole> contactRoles, List<Task> tasks) {
         for (Opportunity opp : opportunities) {
             List<Contact> relatedContacts = accountContactsMap.get(opp.AccountId);
 
             Integer roleCount = Math.min(relatedContacts.size(), 1 + (Integer)Math.floor(Math.random() * 3)); // 1-3 random roles
             for (Integer j = 0; j < roleCount; j++) {
                 Contact relatedContact = relatedContacts[j];
-                OpportunityContactRole ocr = new OpportunityContactRole(
-                    OpportunityId = opp.Id,
-                    ContactId = relatedContact.Id,
-                    Role = 'Influencer'
-                );
-                contactRoles.add(ocr);
+                if (Schema.sObjectType.OpportunityContactRole.isCreateable()) {
+                    OpportunityContactRole ocr = new OpportunityContactRole(
+                        OpportunityId = opp.Id,
+                        ContactId = relatedContact.Id,
+                        Role = 'Influencer'
+                    );
+                    contactRoles.add(ocr);
+                } else {
+                    System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create OpportunityContactRole records.');
+                }
 
-                Task task = new Task(
-                    Subject = 'Follow up with ' + relatedContact.FirstName,
-                    WhatId = opp.Id,
-                    OwnerId = UserInfo.getUserId(),
-                    ActivityDate = Date.today().addDays(-15 + (Integer)(Math.random() * 45)) // -15 to +30 days
-                );
-                tasks.add(task);
+                if (Schema.sObjectType.Task.isCreateable()) {
+                    Task task = new Task(
+                        Subject = 'Follow up with ' + relatedContact.FirstName,
+                        WhatId = opp.Id,
+                        OwnerId = UserInfo.getUserId(),
+                        ActivityDate = Date.today().addDays(-15 + (Integer)(Math.random() * 45)) // -15 to +30 days
+                    );
+                    tasks.add(task);
+                } else {
+                    System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Task records.');
+                }
             }
         }
-
-        // Insert Opportunity Contact Roles
-        insert contactRoles;
-
-        // Insert Tasks
-        insert tasks;
     }
 
-    // Execute Method for Testing in Anonymous Apex
+    /**
+     * @description Execute Method for Testing in Anonymous Apex
+     */
     public static void executeForTest() {
         createStateAccountsWithData();
-        System.debug('Data generation complete!');
+        System.debug(LoggingLevel.INFO, 'Data generation complete!');
     }
 }
