@@ -1,4 +1,4 @@
-public without sharing class ActiveOCRCount {
+global without sharing class ActiveOCRCount {
     
     @InvocableMethod(label='Get Active OCR Count' description='Counts the number of Contacts within the specified date range and ID collection.')
     global static List<ActiveOCRCountResult> countContactsByDateRange(List<ActiveOCRCountInput> inputs) {
@@ -51,7 +51,7 @@ public without sharing class ActiveOCRCount {
 /**
  * @description Input Wrapper Class for Active OCR Count
  */
-    public class ActiveOCRCountInput {
+    global class ActiveOCRCountInput {
     /**
      * @description API Name of the field tracking last activity date
      */

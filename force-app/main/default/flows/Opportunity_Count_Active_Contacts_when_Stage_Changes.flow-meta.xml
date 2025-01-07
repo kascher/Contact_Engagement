@@ -4,8 +4,8 @@
         <description>Prepares for SOQL</description>
         <name>Add_Quotes_to_Collection</name>
         <label>Add Quotes to Collection</label>
-        <locationX>182</locationX>
-        <locationY>1055</locationY>
+        <locationX>50</locationX>
+        <locationY>1163</locationY>
         <actionName>AddQuotesToFields</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -26,8 +26,8 @@
     <actionCalls>
         <name>Get_Active_OCR_Count</name>
         <label>Get Active OCR Count</label>
-        <locationX>182</locationX>
-        <locationY>1163</locationY>
+        <locationX>50</locationX>
+        <locationY>1271</locationY>
         <actionName>ActiveOCRCount</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -107,6 +107,32 @@
                 <targetReference>Update_LastActivityDateAPIName</targetReference>
             </connector>
             <label>Record Exists, Keep Going</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <description>Avoid null point exception errors by checking for results</description>
+        <name>Check_for_OCRs</name>
+        <label>Check for OCRs</label>
+        <locationX>182</locationX>
+        <locationY>947</locationY>
+        <defaultConnector>
+            <targetReference>Update_Active_OCRs</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Has_OCRs</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_All_Opp_OCRs</leftValueReference>
+                <operator>IsEmpty</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>ContactIds</targetReference>
+            </connector>
+            <label>Has OCRs</label>
         </rules>
     </decisions>
     <description>When Opp stage changes, count Opportunity Contact Roles with Last Activity Date between Opportunity Creation Date and Closed Date or within N day lookback window.</description>
@@ -189,7 +215,7 @@
         <locationY>839</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>ContactIds</targetReference>
+            <targetReference>Check_for_OCRs</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -229,7 +255,7 @@
         <name>Update_Active_OCRs</name>
         <label>Update Active OCRs</label>
         <locationX>182</locationX>
-        <locationY>1271</locationY>
+        <locationY>1463</locationY>
         <inputAssignments>
             <field>Active_OCRs__c</field>
             <value>
@@ -271,8 +297,8 @@
         <description>Extracts Contact Ids from OCR collection</description>
         <name>ContactIds</name>
         <label>ContactIds</label>
-        <locationX>182</locationX>
-        <locationY>947</locationY>
+        <locationX>50</locationX>
+        <locationY>1055</locationY>
         <connector>
             <targetReference>Add_Quotes_to_Collection</targetReference>
         </connector>

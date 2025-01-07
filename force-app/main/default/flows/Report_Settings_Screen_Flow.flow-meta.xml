@@ -173,11 +173,6 @@
             <fieldType>DisplayText</fieldType>
         </fields>
         <fields>
-            <name>Batch_Outputs</name>
-            <fieldText>&lt;p&gt;Error: {!Batch_Active_OCR_Subflow.Results.ErrorCount}&lt;/p&gt;&lt;p&gt;Records Processed {!Batch_Active_OCR_Subflow.Results.RecordsProcessed}&lt;/p&gt;&lt;p&gt;Total Job Items: {!Batch_Active_OCR_Subflow.Results.TotalJobItems}&lt;/p&gt;&lt;p&gt;Job Status {!Batch_Active_OCR_Subflow.Results.jobStatus}&lt;/p&gt;&lt;p&gt;Jobid {!Batch_Active_OCR_Subflow.Results.JobId}&lt;/p&gt;&lt;p&gt;JobId Formula {!JobIdFormula}&lt;/p&gt;</fieldText>
-            <fieldType>DisplayText</fieldType>
-        </fields>
-        <fields>
             <name>Check_Status</name>
             <extensionName>flowruntime:actionButtonField</extensionName>
             <fieldType>ComponentInstance</fieldType>
