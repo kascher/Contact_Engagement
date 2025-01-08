@@ -2,7 +2,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
     // Variables to store data across batch execution
     private String lastActivityDateAPIName;
     private Integer nod;
-    private Date SOQLDate;
+    private Date soqlDate;
 
     // Wrapper class for output variables
     public class BatchOutput {
@@ -19,13 +19,14 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         public Integer totalJobItems;
     }
 
-    public BatchOutput output = new BatchOutput();
+    public BatchOutput output;
 
     // Constructor to initialize variables
-    public OpportunityActiveContactBatch(String lastActivityDateAPIName, Integer nod, Date SOQLDate) {
+    public OpportunityActiveContactBatch(String lastActivityDateAPIName, Integer nod, Date soqlDate) {
         this.lastActivityDateAPIName = lastActivityDateAPIName;
         this.nod = nod;
-        this.SOQLDate = SOQLDate;
+        this.soqlDate = soqlDate;
+        this.output = new BatchOutput();
         this.output.recordsProcessed = 0;
         this.output.errorCount = 0;
         this.output.totalJobItems = 0;
@@ -37,7 +38,6 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
                        'FROM Opportunity ' +
                        'WHERE IsClosed = true AND CloseDate >= :SOQLDate';
 
-        System.debug('Start Query: ' + query);
         return Database.getQueryLocator(query);
     }
 
@@ -61,73 +61,58 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         }
 
         List<Opportunity> opportunitiesToUpdate = new List<Opportunity>();
+        Map<Id, Integer> contactCounts = new Map<Id, Integer>();
+        
+        for (OpportunityContactRole ocr : [
+            SELECT OpportunityId, COUNT(Id) contactCount 
+            FROM OpportunityContactRole 
+            WHERE OpportunityId IN :oppIds 
+            GROUP BY OpportunityId
+        ]) {
+            contactCounts.put(ocr.OpportunityId, ocr.contactCount);
+        }
+
         for (Opportunity opp : scope) {
-            System.debug('Processing Opportunity with Id: ' + opp.Id);
-
-            try {
-                if (oppToOCRs.containsKey(opp.Id)) {
-                    List<OpportunityContactRole> ocrs = oppToOCRs.get(opp.Id);
-
-                    Set<Id> contactIds = new Set<Id>();
-                    for (OpportunityContactRole ocr : ocrs) {
-                        contactIds.add(ocr.ContactId);
-                    }
-
-                    String startDateSOQL = formatDateForSOQL(calculateActiveWindowSOQLDate(opp));
-                    String closeDateSOQL = formatDateForSOQL(opp.CloseDate);
-                    String query = 'SELECT Id FROM Contact WHERE ' + 
-                                   lastActivityDateAPIName + ' >= :startDateSOQL AND ' +
-                                   lastActivityDateAPIName + ' <= :closeDateSOQL AND ' +
-                                   'Id IN :contactIds';
-
-                    System.debug('Contact Query: ' + query);
-
-                    Integer activeOCRCount = [SELECT COUNT() FROM Contact WHERE Id IN :contactIds];
-                    opp.asreporting__Active_OCRs__c = activeOCRCount;
-                    System.debug('Opportunity asreporting__Active_OCRs__c (after update): ' + opp.asreporting__Active_OCRs__c);
-                    opportunitiesToUpdate.add(opp);
-                }
-
-                output.recordsProcessed++;
-            } catch (Exception e) {
-                System.debug('Error processing Opportunity with Id ' + opp.Id + ': ' + e.getMessage());
-                output.errorCount++;
-            }
+            Integer activeOCRCount = contactCounts.get(opp.Id);
+            opp.asreporting__Active_OCRs__c = activeOCRCount != null ? activeOCRCount : 0;
+            opportunitiesToUpdate.add(opp);
         }
 
         if (!opportunitiesToUpdate.isEmpty()) {
             update opportunitiesToUpdate;
-            System.debug('Updated Opportunities: ' + opportunitiesToUpdate);
         }
     }
 
     // Finish method to log results or perform final actions
-    public void finish(Database.BatchableContext bc) {
-        output.jobStatus = 'Completed';
+public void finish(Database.BatchableContext bc) {
+    output.jobStatus = 'Completed';
 
-        try {
-            AsyncApexJob a = [
-                SELECT Id, Status, ExtendedStatus, NumberOfErrors, JobItemsProcessed, TotalJobItems, CreatedBy.Email
-                FROM AsyncApexJob WHERE Id = :bc.getJobId()
-            ];
+    try {
+        AsyncApexJob a = [
+            SELECT Id, Status, ExtendedStatus, NumberOfErrors, JobItemsProcessed, TotalJobItems, CreatedBy.Email
+            FROM AsyncApexJob WHERE Id = :bc.getJobId()
+        ];
 
-            output.jobStatus = a.Status;
-            output.errorCount += a.NumberOfErrors;
-            output.totalJobItems = a.TotalJobItems;
+        output.jobStatus = a.Status;
+        output.totalJobItems = a.TotalJobItems;
 
-            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-            String[] toAddresses = new String[] {a.CreatedBy.Email};
-            mail.setToAddresses(toAddresses);
-            mail.setSubject('Calculate Active Opp Contacts ' + a.Status);
-            mail.setPlainTextBody('The batch Apex job processed ' + a.TotalJobItems +
-                ' batches with ' + a.NumberOfErrors + ' failures. More info at Setup->Apex Jobs');
-            Messaging.sendEmail(new Messaging.SingleEmailMessage[] {mail});
-        } catch (Exception e) {
-            System.debug('Error sending email: ' + e.getMessage());
-        }
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        String[] toAddresses = new String[] {a.CreatedBy.Email};
+        mail.setToAddresses(toAddresses);
+        mail.setSubject('Calculate Active Opp Contacts ' + a.Status);
+        mail.setPlainTextBody('Batch job for calculating active Opportunity Contact Roles has completed with status: '
+            + a.Status + '. Processed ' + a.JobItemsProcessed + ' batches with ' 
+            + a.NumberOfErrors + ' failures. More info at Setup -> Apex Jobs.');
 
-        System.debug('Batch completed with status: ' + output.jobStatus + ', records processed: ' + output.recordsProcessed + ', errors: ' + output.errorCount);
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] {mail});
+    } catch (Exception e) {
+        System.debug(LoggingLevel.ERROR, 'Error sending email: ' + e.getMessage());
     }
+
+    System.debug(LoggingLevel.INFO, 'Batch completed with status: ' + output.jobStatus 
+        + ', records processed: ' + output.recordsProcessed 
+        + ', errors: ' + output.errorCount);
+}
 
     private Date calculateActiveWindowSOQLDate(Opportunity opp) {
         Date createdSOQLDate = opp.CreatedDate != null ? ((DateTime) opp.CreatedDate).date() : null;
@@ -139,7 +124,7 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         return createdSOQLDate != null ? createdSOQLDate : Date.today();
     }
 
-    private String formatDateForSOQL(Date SOQLDate) {
+    private String formatDateForSOQL(Date soqlDate) {
         return SOQLDate.year() + '-' + String.valueOf(SOQLDate.month()) + '-' + String.valueOf(SOQLDate.day());
     }
 
@@ -175,6 +160,6 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         public Integer nod;
 
         @InvocableVariable(label='Start Date (SOQL Date)' description='The start date to filter closed Opportunities' required=true)
-        public Date SOQLDate;
+        public Date soqlDate;
     }
 }
