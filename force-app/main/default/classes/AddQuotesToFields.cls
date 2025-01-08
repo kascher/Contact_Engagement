@@ -1,25 +1,39 @@
-global without sharing class AddQuotesToFields {
-    global class Input {
+/**
+ * @description This class adds quotes to each element in a collection.
+ */
+public without sharing class AddQuotesToFields {
+    /**
+     * @description This inner class represents the input parameters.
+     */
+    public class Input {
         @InvocableVariable(description='Collection of records to transform')
-        global List<String> fieldCollection;
+        public List<String> fieldCollection;
 
         @InvocableVariable(description='Comma separated string of records to transform')
-        global String fieldString;
+        public String fieldString;
 
         @InvocableVariable(description='Valid inputs are SINGLE for single quotes or DOUBLE for double quotes; Default value is SINGLE.')
-        global String quoteType;
+        public String quoteType;
     }
 
-    global class Output {
+    /**
+     * @description This inner class represents the output parameters.
+     */
+    public class Output {
         @InvocableVariable(description='Collection of records transformed with quotes')
-        global List<String> fieldCollection;
+        public List<String> fieldCollection;
 
         @InvocableVariable(description='Comma separated string of records transformed with quotes')
-        global String fieldString;
+        public String fieldString;
     }
 
-    @InvocableMethod(description='Add qoutes to each element in a collection')
-    global static List<Output> addQuotesToFields(List<Input> inputs) {
+    /**
+     * @description This method adds quotes to each element in a collection.
+     * @param inputs List of Input objects containing the parameters.
+     * @return List of Output objects containing the transformed records.
+     */
+    @InvocableMethod(description='Add quotes to each element in a collection')
+    public static List<Output> addQuotesToFieldsMethod(List<Input> inputs) {
         List<Output> outputs = new List<Output>{};
         for (Input input: inputs) {
             if (input.fieldString != null && input.fieldString.length() > 0) {

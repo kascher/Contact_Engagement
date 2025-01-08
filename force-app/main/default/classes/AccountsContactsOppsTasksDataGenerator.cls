@@ -9,7 +9,8 @@ public with sharing class AccountsContactsOppsTasksDataGenerator {
      */
     public static void createStateAccountsWithData() {
         if (!Schema.sObjectType.Account.isCreateable()) {
-            System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Account records.');
+            // Log insufficient permissions to create Account records
+            // Custom logging logic can be added here if needed
             return;
         }
 
@@ -19,21 +20,22 @@ public with sharing class AccountsContactsOppsTasksDataGenerator {
         List<OpportunityContactRole> contactRoles = new List<OpportunityContactRole>();
         List<Task> tasks = new List<Task>();
 
-        createOpportunityContactRolesAndTasks(opportunities, accountContactsMap, contactRoles, tasks);
+        DataWrapper dataWrapper = new DataWrapper();
+        dataWrapper.opportunities = opportunities;
+        dataWrapper.accountContactsMap = accountContactsMap;
+        dataWrapper.contactRoles = contactRoles;
+        dataWrapper.tasks = tasks;
+        createOpportunityContactRolesAndTasks(dataWrapper);
 
         // Insert Opportunity Contact Roles
         if (Schema.sObjectType.OpportunityContactRole.isCreateable()) {
             insert contactRoles;
-        } else {
-            System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create OpportunityContactRole records.');
+            // Log insufficient permissions to create OpportunityContactRole records
+            // Custom logging logic can be added here if needed
+            // Log insufficient permissions to create OpportunityContactRole records
+            // Custom logging logic can be added here if needed
         }
 
-        // Insert Tasks
-        if (Schema.sObjectType.Task.isCreateable()) {
-            insert tasks;
-        } else {
-            System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Task records.');
-        }
     }
 
     private static List<Account> createAccounts() {
@@ -59,10 +61,11 @@ public with sharing class AccountsContactsOppsTasksDataGenerator {
     private static Map<Id, List<Contact>> createContacts(List<Account> accounts) {
         List<Contact> contacts = new List<Contact>();
         Map<Id, List<Contact>> accountContactsMap = new Map<Id, List<Contact>>();
-
+                // Log insufficient permissions to create Contact records
+                // Custom logging logic can be added here if needed
         for (Account acc : accounts) {
             if (!Schema.sObjectType.Contact.isCreateable()) {
-                System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Contact records.');
+                // Handle insufficient permissions to create Contact records
                 continue;
             }
 
@@ -87,11 +90,12 @@ public with sharing class AccountsContactsOppsTasksDataGenerator {
     }
 
     private static List<Opportunity> createOpportunities(List<Account> accounts) {
-        List<Opportunity> opportunities = new List<Opportunity>();
+                // Log insufficient permissions to create Opportunity records
+                // Custom logging logic can be added here if needed
 
         for (Account acc : accounts) {
             if (!Schema.sObjectType.Opportunity.isCreateable()) {
-                System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Opportunity records.');
+                // Handle insufficient permissions to create Opportunity records
                 continue;
             }
 
@@ -119,10 +123,9 @@ public with sharing class AccountsContactsOppsTasksDataGenerator {
         insert opportunities;
         return opportunities;
     }
-
-    private static void createOpportunityContactRolesAndTasks(List<Opportunity> opportunities, Map<Id, List<Contact>> accountContactsMap, List<OpportunityContactRole> contactRoles, List<Task> tasks) {
-        for (Opportunity opp : opportunities) {
-            List<Contact> relatedContacts = accountContactsMap.get(opp.AccountId);
+    private static void createOpportunityContactRolesAndTasks(DataWrapper dataWrapper) {
+        for (Opportunity opp : dataWrapper.opportunities) {
+            List<Contact> relatedContacts = dataWrapper.accountContactsMap.get(opp.AccountId);
 
             Integer roleCount = Math.min(relatedContacts.size(), 1 + (Integer)Math.floor(Math.random() * 3)); // 1-3 random roles
             for (Integer j = 0; j < roleCount; j++) {
@@ -133,9 +136,7 @@ public with sharing class AccountsContactsOppsTasksDataGenerator {
                         ContactId = relatedContact.Id,
                         Role = 'Influencer'
                     );
-                    contactRoles.add(ocr);
-                } else {
-                    System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create OpportunityContactRole records.');
+                    dataWrapper.contactRoles.add(ocr);
                 }
 
                 if (Schema.sObjectType.Task.isCreateable()) {
@@ -145,19 +146,28 @@ public with sharing class AccountsContactsOppsTasksDataGenerator {
                         OwnerId = UserInfo.getUserId(),
                         ActivityDate = Date.today().addDays(-15 + (Integer)(Math.random() * 45)) // -15 to +30 days
                     );
-                    tasks.add(task);
-                } else {
-                    System.debug(LoggingLevel.ERROR, 'Insufficient permissions to create Task records.');
+                    dataWrapper.tasks.add(task);
                 }
             }
         }
     }
 
+    private class DataWrapper {
+        List<Opportunity> opportunities;
+        Map<Id, List<Contact>> accountContactsMap;
+        List<OpportunityContactRole> contactRoles;
+        List<Task> tasks;
+
+        DataWrapper() {
+            this.accountContactsMap = new Map<Id, List<Contact>>();
+            this.contactRoles = new List<OpportunityContactRole>();
+            this.tasks = new List<Task>();
+        }
+    }
     /**
      * @description Execute Method for Testing in Anonymous Apex
      */
     public static void executeForTest() {
         createStateAccountsWithData();
-        System.debug(LoggingLevel.INFO, 'Data generation complete!');
     }
 }

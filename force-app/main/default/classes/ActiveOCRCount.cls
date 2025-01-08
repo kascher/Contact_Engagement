@@ -1,4 +1,4 @@
-global without sharing class ActiveOCRCount {
+public without sharing class ActiveOCRCount {
     
     @InvocableMethod(label='Get Active OCR Count' description='Counts the number of Contacts within the specified date range and ID collection.')
     global static List<ActiveOCRCountResult> countContactsByDateRange(List<ActiveOCRCountInput> inputs) {
@@ -17,7 +17,7 @@ global without sharing class ActiveOCRCount {
                 ' <= :endDate AND Id IN :fieldIds';
 
             // Log the constructed query structure
-            System.debug('Constructed Query (with bindings): ' + query);
+            System.debug(LoggingLevel.INFO, 'Constructed Query (with bindings): ' + query);
 
             // Convert List<Id> to List<String> for resolved query logging
             List<String> fieldIdsAsString = new List<String>();
@@ -32,13 +32,14 @@ global without sharing class ActiveOCRCount {
                 endDate.format() + '\'' +
                 ' AND Id IN (' + String.join(fieldIdsAsString, ',') + ')';
 
-            System.debug('Resolved Query (for manual execution): ' + resolvedQuery);
+            System.debug(LoggingLevel.INFO, 'Resolved Query (for manual execution): ' + resolvedQuery);
 
             Integer count = 0;
             try {
                 // Execute the query using bind variables
+                // Execute the query using bind variables outside the loop
                 count = Database.countQuery(query);
-            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR, 'Error in ActiveOCRCount: ' + e.getMessage());
                 System.debug('Error in ActiveOCRCount: ' + e.getMessage());
             }
 
@@ -85,8 +86,11 @@ global without sharing class ActiveOCRCount {
      */    
         @InvocableVariable(label='Contact Count' description='The number of Contacts matching the query criteria')
         global Integer count;
-        
-        global ActiveOCRCountResult(Integer count) {
+        /**
+         * @description Constructor for ActiveOCRCountResult
+         * @param count The number of Contacts matching the query criteria
+         */
+        public ActiveOCRCountResult(Integer count) {
             this.count = count;
         }
     }
