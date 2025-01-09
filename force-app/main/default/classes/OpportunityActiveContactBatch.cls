@@ -1,10 +1,26 @@
+/**
+ * @description Batch class to calculate and update the count of active Opportunity Contact Roles (OCRs).
+ * Implements Database.Batchable and Database.Stateful interfaces for batch processing.
+ */
 public class OpportunityActiveContactBatch implements Database.Batchable<SObject>, Database.Stateful {
-    // Variables to store data across batch execution
-    private String lastActivityDateAPIName;
+    /**
+     * @description Output object to store batch job results.
+     */
+    public BatchOutput output;
+
+    /**
+     * @description Number of days to look back from CloseDate.
+     */
     private Integer nod;
+
+    /**
+     * @description Start date to filter closed Opportunities.
+     */
     private Date soqlDate;
 
-    // Wrapper class for output variables
+    /**
+     * @description Wrapper class for output variables.
+     */
     public class BatchOutput {
         @InvocableVariable(label='Job Status' description='The status of the batch job')
         public String jobStatus;
@@ -18,12 +34,13 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         @InvocableVariable(label='Total Job Items' description='The total number of job items processed by the batch job')
         public Integer totalJobItems;
     }
+    /**
+     * @description Constructor to initialize variables.
+     * @param nod Number of days to look back from CloseDate.
+     * @param soqlDate Start date to filter closed Opportunities.
+     */
 
-    public BatchOutput output;
-
-    // Constructor to initialize variables
-    public OpportunityActiveContactBatch(String lastActivityDateAPIName, Integer nod, Date soqlDate) {
-        this.lastActivityDateAPIName = lastActivityDateAPIName;
+    public OpportunityActiveContactBatch(Integer nod, Date soqlDate) {
         this.nod = nod;
         this.soqlDate = soqlDate;
         this.output = new BatchOutput();
@@ -32,7 +49,11 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         this.output.totalJobItems = 0;
     }
 
-    // Start method to query all closed Opportunities on or after the specified date
+    /**
+     * @description Start method to query all closed Opportunities on or after the specified date.
+     * @param bc Batchable context.
+     * @return QueryLocator for the batch job.
+     */
     public Database.QueryLocator start(Database.BatchableContext bc) {
         String query = 'SELECT Id, Name, StageName, CreatedDate, CloseDate ' +
                        'FROM Opportunity ' +
@@ -41,7 +62,11 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         return Database.getQueryLocator(query);
     }
 
-    // Execute method to process a batch of Opportunities
+    /**
+     * @description Execute method to process a batch of Opportunities.
+     * @param bc Batchable context.
+     * @param scope List of Opportunities to process.
+     */
     public void execute(Database.BatchableContext bc, List<Opportunity> scope) {
         Set<Id> oppIds = new Set<Id>();
         for (Opportunity opp : scope) {
@@ -63,13 +88,13 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         List<Opportunity> opportunitiesToUpdate = new List<Opportunity>();
         Map<Id, Integer> contactCounts = new Map<Id, Integer>();
         
-        for (OpportunityContactRole ocr : [
-            SELECT OpportunityId, COUNT(Id) contactCount 
+        for (AggregateResult ar : [
+            SELECT OpportunityId, COUNT(Id) cnt 
             FROM OpportunityContactRole 
             WHERE OpportunityId IN :oppIds 
             GROUP BY OpportunityId
         ]) {
-            contactCounts.put(ocr.OpportunityId, ocr.contactCount);
+            contactCounts.put((Id)ar.get('OpportunityId'), (Integer)ar.get('cnt'));
         }
 
         for (Opportunity opp : scope) {
@@ -83,7 +108,10 @@ public class OpportunityActiveContactBatch implements Database.Batchable<SObject
         }
     }
 
-    // Finish method to log results or perform final actions
+/**
+ * @description Finish method to log results or perform final actions.
+ * @param bc Batchable context.
+ */
 public void finish(Database.BatchableContext bc) {
     output.jobStatus = 'Completed';
 
@@ -96,24 +124,39 @@ public void finish(Database.BatchableContext bc) {
         output.jobStatus = a.Status;
         output.totalJobItems = a.TotalJobItems;
 
+        // Send a notification email
         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
         String[] toAddresses = new String[] {a.CreatedBy.Email};
         mail.setToAddresses(toAddresses);
         mail.setSubject('Calculate Active Opp Contacts ' + a.Status);
-        mail.setPlainTextBody('Batch job for calculating active Opportunity Contact Roles has completed with status: '
+        mail.setPlainTextBody(
+            'Batch job for calculating active Opportunity Contact Roles has completed with status: '
             + a.Status + '. Processed ' + a.JobItemsProcessed + ' batches with ' 
-            + a.NumberOfErrors + ' failures. More info at Setup -> Apex Jobs.');
-
+            + a.NumberOfErrors + ' failures. More info at Setup -> Apex Jobs.'
+        );
         Messaging.sendEmail(new Messaging.SingleEmailMessage[] {mail});
-    } catch (Exception e) {
-        System.debug(LoggingLevel.ERROR, 'Error sending email: ' + e.getMessage());
-    }
 
-    System.debug(LoggingLevel.INFO, 'Batch completed with status: ' + output.jobStatus 
-        + ', records processed: ' + output.recordsProcessed 
-        + ', errors: ' + output.errorCount);
+    } catch (Exception e) {
+        // Handle exception while processing the finish logic
+        try {
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+            mail.setToAddresses(new String[] {'admin@example.com'}); // Replace with a backup admin email
+            mail.setSubject('Error in OpportunityActiveContactBatch');
+            mail.setPlainTextBody('An exception occurred in the finish method: ' + e.getMessage() + '\nStack Trace: ' + e.getStackTraceString());
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[] {mail});
+        } catch (Exception emailException) {
+           throw emailException;
+        }
+    }
 }
 
+
+
+    /**
+     * @description Calculate the active window SOQL date for an Opportunity.
+     * @param opp The Opportunity record.
+     * @return The calculated SOQL date.
+     */
     private Date calculateActiveWindowSOQLDate(Opportunity opp) {
         Date createdSOQLDate = opp.CreatedDate != null ? ((DateTime) opp.CreatedDate).date() : null;
         Date closeSOQLDate = opp.CloseDate != null ? ((DateTime) opp.CloseDate).date() : null;
@@ -124,17 +167,26 @@ public void finish(Database.BatchableContext bc) {
         return createdSOQLDate != null ? createdSOQLDate : Date.today();
     }
 
+    /**
+     * @description Format a Date object for SOQL.
+     * @param soqlDate The Date object to format.
+     * @return The formatted date string.
+     */
     private String formatDateForSOQL(Date soqlDate) {
         return SOQLDate.year() + '-' + String.valueOf(SOQLDate.month()) + '-' + String.valueOf(SOQLDate.day());
     }
 
+    /**
+ * @description Runs the batch process for updating Opportunities with active OCR counts.
+ * @param inputs List of BatchInput objects containing the input parameters.
+ * @return List of BatchOutput objects with the batch job results.
+ */
     @InvocableMethod(label='Count Active OCRs Batch' description='Runs the batch process for updating Opportunities with active OCR counts.' category='Opportunity')
     public static List<BatchOutput> runBatch(List<BatchInput> inputs) {
         List<BatchOutput> outputs = new List<BatchOutput>();
         if (!inputs.isEmpty()) {
             BatchInput input = inputs[0];
             OpportunityActiveContactBatch batch = new OpportunityActiveContactBatch(
-                input.lastActivityDateAPIName,
                 input.nod,
                 input.SOQLDate
             );
@@ -152,10 +204,10 @@ public void finish(Database.BatchableContext bc) {
         return outputs;
     }
 
+  /**
+     * @description Input wrapper class for batch parameters.
+     */
     public class BatchInput {
-        @InvocableVariable(label='Last Activity Date API Name' description='The API name of the Last Activity Date field' required=true)
-        public String lastActivityDateAPIName;
-
         @InvocableVariable(label='Number of Days (Lookback)' description='The number of days to look back from CloseDate' required=true)
         public Integer nod;
 

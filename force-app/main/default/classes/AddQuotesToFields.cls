@@ -34,20 +34,20 @@ public without sharing class AddQuotesToFields {
      */
     @InvocableMethod(description='Add quotes to each element in a collection')
     public static List<Output> addQuotesToFieldsMethod(List<Input> inputs) {
-        List<Output> outputs = new List<Output>{};
-        for (Input input: inputs) {
+        List<Output> outputs = new List<Output>();
+        for (Input input : inputs) {
             if (input.fieldString != null && input.fieldString.length() > 0) {
                 input.fieldCollection = input.fieldString.split(',');
             }
             if (input.quoteType == null) {
                 input.quoteType = 'SINGLE';
             }
-            List<String> transformed = new List<String>{};
-            for (String field: input.fieldCollection) {
+            List<String> transformed = new List<String>();
+            for (String field : input.fieldCollection) {
                 if (input.quoteType == 'DOUBLE') {
                     field = '"' + field + '"';
                 } else {
-                    field = '\'' + field.replace('\'', '\\\'') + '\'';
+                    field = '\'' + field.replace('\'', '\\\'') + '\''; // Escape single quotes
                 }
                 transformed.add(field);
             }

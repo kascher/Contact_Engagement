@@ -90,6 +90,7 @@ public with sharing class AccountsContactsOppsTasksDataGenerator {
     }
 
     private static List<Opportunity> createOpportunities(List<Account> accounts) {
+                List<Opportunity> opportunities = new List<Opportunity>();
                 // Log insufficient permissions to create Opportunity records
                 // Custom logging logic can be added here if needed
 
