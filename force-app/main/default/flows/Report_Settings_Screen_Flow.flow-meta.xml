@@ -37,7 +37,7 @@
         <locationY>134</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>Get_Last_Activity_Date_Custom_Setting_Record</targetReference>
+            <targetReference>Set_Custom_Settings_Screen</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -51,41 +51,11 @@
         <object>N_Days__mdt</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
-    <recordLookups>
-        <description>Custom Setting Record that holds the API name of the field used to hold Last Activity.  Defaults to package custom field of Last_Activity_Date__c.   Using a product like SalesLoft or Outreach would require a different field.</description>
-        <name>Get_Last_Activity_Date_Custom_Setting_Record</name>
-        <label>Get Last Activity Date Custom Setting Record</label>
-        <locationX>176</locationX>
-        <locationY>242</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>Set_Custom_Settings_Screen</targetReference>
-        </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Name</field>
-            <operator>EqualTo</operator>
-            <value>
-                <stringValue>Last Activity Date</stringValue>
-            </value>
-        </filters>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>Acoustic_Report_Settings__c</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </recordLookups>
-    <recordUpdates>
-        <description>Commit changes.</description>
-        <name>Commit_Last_Activity_Field</name>
-        <label>Commit Last Activity Field</label>
-        <locationX>176</locationX>
-        <locationY>566</locationY>
-        <inputReference>Get_Last_Activity_Date_Custom_Setting_Record</inputReference>
-    </recordUpdates>
     <screens>
         <name>Confirmation_Screen</name>
         <label>Confirmation Screen</label>
         <locationX>176</locationX>
-        <locationY>458</locationY>
+        <locationY>350</locationY>
         <actions>
             <name>Get_JobId_Status_Subflow</name>
             <actionName>asreporting__Get_JobId_Status_Subflow</actionName>
@@ -103,12 +73,9 @@
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
-        <connector>
-            <targetReference>Commit_Last_Activity_Field</targetReference>
-        </connector>
         <fields>
-            <name>ConfirmationText</name>
-            <fieldText>&lt;p&gt;Would you like to set the API Name for the Contact last activity date field to &lt;strong&gt;{!Get_Last_Activity_Date_Custom_Setting_Record.Field_API_Name__c}&lt;/strong&gt;?&lt;/p&gt;</fieldText>
+            <name>Check_Status_Text</name>
+            <fieldText>&lt;p&gt;You can check the Batch Job status by pressing the button below.&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <fields>
@@ -118,7 +85,7 @@
             <inputParameters>
                 <name>label</name>
                 <value>
-                    <stringValue>Check Status</stringValue>
+                    <stringValue>Check Batch Job Status</stringValue>
                 </value>
             </inputParameters>
             <inputParameters>
@@ -163,7 +130,7 @@
         <name>Set_Custom_Settings_Screen</name>
         <label>Set Custom Settings Screen</label>
         <locationX>176</locationX>
-        <locationY>350</locationY>
+        <locationY>242</locationY>
         <actions>
             <name>Batch_Active_OCR_Subflow</name>
             <actionName>asreporting__Batch_Active_OCR_Subflow</actionName>
@@ -171,7 +138,7 @@
             <inputParameters>
                 <name>AnalysisStartDate</name>
                 <value>
-                    <elementReference>Start_Date</elementReference>
+                    <elementReference>Close_Date</elementReference>
                 </value>
             </inputParameters>
             <inputParameters>
@@ -202,8 +169,8 @@
                 <name>Set_Custom_Settings_Screen_Section1_Column1</name>
                 <fieldType>Region</fieldType>
                 <fields>
-                    <name>Active_Contact_Window_text</name>
-                    <fieldText>&lt;p&gt;&lt;strong&gt;Active Contact Window - &lt;/strong&gt;lookback period from Opportunity Close Date for which a Contact is considered active.  If left blank, defaults to Opportunity Created Date.&lt;/p&gt;&lt;p&gt;Changes must be made via Custom Metadata/N Data/Manage Records.&lt;/p&gt;</fieldText>
+                    <name>Active_Contact_Window_text_Step1</name>
+                    <fieldText>&lt;p&gt;&lt;strong style=&quot;font-size: 18px;&quot;&gt;Step 1.&lt;/strong&gt;&lt;strong&gt;  Active Contact Window - &lt;/strong&gt;lookback period from Opportunity Close Date for which a Contact is considered active.  If left blank, defaults to Opportunity Created Date.&lt;/p&gt;&lt;p&gt;Changes must be made via Custom Metadata/N Data/Manage Records.&lt;/p&gt;</fieldText>
                     <fieldType>DisplayText</fieldType>
                 </fields>
                 <inputParameters>
@@ -240,8 +207,8 @@
                 <name>Set_Custom_Settings_Screen_Section2_Column1</name>
                 <fieldType>Region</fieldType>
                 <fields>
-                    <name>BackfillDisplayText</name>
-                    <fieldText>&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Backfill the Active Opportunity Contact Count &lt;/strong&gt;for closed opportunities going back to the selected date.&lt;/p&gt;</fieldText>
+                    <name>BackfillDisplayText_Step2</name>
+                    <fieldText>&lt;p&gt;&lt;strong style=&quot;font-size: 18px;&quot;&gt;Step 2. &lt;/strong&gt;&lt;strong&gt;Backfill the Active Opportunity Contact Count &lt;/strong&gt;for all Opportunities that closed on or after the selected date.&lt;/p&gt;</fieldText>
                     <fieldType>DisplayText</fieldType>
                 </fields>
                 <inputParameters>
@@ -256,9 +223,9 @@
                 <name>Set_Custom_Settings_Screen_Section2_Column2</name>
                 <fieldType>Region</fieldType>
                 <fields>
-                    <name>Start_Date</name>
+                    <name>Close_Date</name>
                     <dataType>Date</dataType>
-                    <fieldText>Start Date</fieldText>
+                    <fieldText>Close Date</fieldText>
                     <fieldType>InputField</fieldType>
                     <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
@@ -276,6 +243,7 @@
                 <fieldType>Region</fieldType>
                 <fields>
                     <name>BlankSpace</name>
+                    <fieldText>&lt;p&gt;Start the calculation by pressing the button below.  You will receive an email once complete.  You can also check the status on the next screen.&lt;/p&gt;</fieldText>
                     <fieldType>DisplayText</fieldType>
                 </fields>
                 <fields>
@@ -285,7 +253,7 @@
                     <inputParameters>
                         <name>label</name>
                         <value>
-                            <stringValue>Calculate Now</stringValue>
+                            <stringValue>Start Batch Job</stringValue>
                         </value>
                     </inputParameters>
                     <inputParameters>
@@ -321,6 +289,28 @@
             <isRequired>false</isRequired>
             <regionContainerType>SectionWithoutHeader</regionContainerType>
         </fields>
+        <fields>
+            <name>Set_Custom_Settings_Screen_Section3</name>
+            <fieldType>RegionContainer</fieldType>
+            <fields>
+                <name>Set_Custom_Settings_Screen_Section3_Column1</name>
+                <fieldType>Region</fieldType>
+                <fields>
+                    <name>TurnOnFlows_Step3</name>
+                    <fieldText>&lt;p&gt;&lt;strong style=&quot;font-size: 18px;&quot;&gt;Step 3.  &lt;/strong&gt;&lt;strong&gt;Enable Flows.&lt;/strong&gt; The Flows are already active but need to be enabled.  Go to Setup-&amp;gt;Custom Metadata Types-&amp;gt;Toggle Switch (Manage Records)-&amp;gt;Master-&amp;gt;Edit.  Check all boxes.&lt;/p&gt;</fieldText>
+                    <fieldType>DisplayText</fieldType>
+                </fields>
+                <inputParameters>
+                    <name>width</name>
+                    <value>
+                        <stringValue>12</stringValue>
+                    </value>
+                </inputParameters>
+                <isRequired>false</isRequired>
+            </fields>
+            <isRequired>false</isRequired>
+            <regionContainerType>SectionWithoutHeader</regionContainerType>
+        </fields>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
         <triggers>
@@ -339,12 +329,4 @@
         </connector>
     </start>
     <status>Active</status>
-    <variables>
-        <name>LastActivityDateRecord</name>
-        <dataType>SObject</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-        <objectType>Acoustic_Report_Settings__c</objectType>
-    </variables>
 </Flow>

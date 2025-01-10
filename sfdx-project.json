@@ -1,12 +1,12 @@
 {
   "packageDirectories": [
     {
-      "versionName": "Internal ver 0.5.0.1",
-      "versionNumber": "0.5.0.NEXT",
+      "versionName": "Prelease",
+      "versionNumber": "0.9.2.NEXT",
       "path": "force-app",
       "default": true,
       "package": "Pipeline Analytics",
-      "versionDescription": "Reports, dashboards, and supporting customizations from AcousticSelling designed for sales, marketing, and customer success teams."
+      "versionDescription": "Multithreading/Contact Engagement report with supporting customizations"
     }
   ],
   "name": "Contact_Engagement",
