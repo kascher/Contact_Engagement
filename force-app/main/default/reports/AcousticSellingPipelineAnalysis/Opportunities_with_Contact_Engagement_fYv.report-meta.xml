@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <aggregates>
-        <calculatedFormula>WON:SUM / OPPORTUNITY.NAME:UNIQUE</calculatedFormula>
+        <calculatedFormula>WON:SUM / RowCount</calculatedFormula>
         <datatype>percent</datatype>
+        <description>Won Opportunities as a % of All Closed Opportunities</description>
         <developerName>FORMULA1</developerName>
         <isActive>true</isActive>
         <isCrossBlock>false</isCrossBlock>
-        <masterLabel>Win %</masterLabel>
+        <masterLabel>Win Rate %</masterLabel>
         <scale>2</scale>
     </aggregates>
     <buckets>
         <bucketType>number</bucketType>
-        <developerName>BucketField_51500649</developerName>
+        <developerName>BucketField_50186227</developerName>
         <masterLabel>Active OCRs</masterLabel>
         <nullTreatment>z</nullTreatment>
         <sourceColumnName>Opportunity.Active_OCRs__c</sourceColumnName>
@@ -45,7 +46,7 @@
     </buckets>
     <buckets>
         <bucketType>number</bucketType>
-        <developerName>BucketField_34881713</developerName>
+        <developerName>BucketField_86420958</developerName>
         <masterLabel>Amount</masterLabel>
         <nullTreatment>z</nullTreatment>
         <sourceColumnName>AMOUNT</sourceColumnName>
@@ -70,27 +71,48 @@
             <value>$10,000+</value>
         </values>
     </buckets>
+    <chart>
+        <backgroundColor1>#FFFFFF</backgroundColor1>
+        <backgroundColor2>#FFFFFF</backgroundColor2>
+        <backgroundFadeDir>Diagonal</backgroundFadeDir>
+        <chartSummaries>
+            <axisBinding>y</axisBinding>
+            <column>FORMULA1</column>
+        </chartSummaries>
+        <chartType>VerticalColumnStacked</chartType>
+        <enableHoverLabels>false</enableHoverLabels>
+        <expandOthers>true</expandOthers>
+        <groupingColumn>BucketField_50186227</groupingColumn>
+        <legendPosition>Right</legendPosition>
+        <location>CHART_BOTTOM</location>
+        <secondaryGroupingColumn>BucketField_86420958</secondaryGroupingColumn>
+        <showAxisLabels>true</showAxisLabels>
+        <showPercentage>false</showPercentage>
+        <showTotal>false</showTotal>
+        <showValues>false</showValues>
+        <size>Medium</size>
+        <summaryAxisRange>Auto</summaryAxisRange>
+        <textColor>#000000</textColor>
+        <textSize>12</textSize>
+        <titleColor>#000000</titleColor>
+        <titleSize>18</titleSize>
+    </chart>
     <colorRanges>
         <columnName>FORMULA1</columnName>
-        <highColor>#FFFFFF</highColor>
-        <lowBreakpoint>30.0</lowBreakpoint>
-        <lowColor>#FFFFFF</lowColor>
-        <midColor>#006714</midColor>
+        <highBreakpoint>40.0</highBreakpoint>
+        <highColor>#006714</highColor>
+        <lowBreakpoint>10.0</lowBreakpoint>
+        <lowColor>#B50E03</lowColor>
+        <midColor>#FFFFFF</midColor>
     </colorRanges>
     <columns>
-        <field>ACCOUNT.NAME</field>
+        <field>ACCOUNT_NAME</field>
     </columns>
     <columns>
-        <field>OPPORTUNITY.NAME</field>
+        <field>OPPORTUNITY_NAME</field>
     </columns>
     <columns>
-        <field>FIRST_NAME</field>
-    </columns>
-    <columns>
-        <field>LAST_NAME</field>
-    </columns>
-    <columns>
-        <field>OWNER_FULL_NAME</field>
+        <field>STAGE_NAME</field>
     </columns>
     <columns>
         <field>Opportunity.Active_OCRs__c</field>
@@ -103,11 +125,31 @@
         <aggregateTypes>Average</aggregateTypes>
         <field>AMOUNT</field>
     </columns>
+    <columns>
+        <field>AGE</field>
+    </columns>
+    <columns>
+        <field>CLOSE_DATE</field>
+    </columns>
+    <columns>
+        <field>CREATED_DATE</field>
+    </columns>
+    <columns>
+        <field>LEAD_SOURCE</field>
+    </columns>
+    <columns>
+        <field>TYPE</field>
+    </columns>
+    <description>Matrix Report comparing Number of Active Opportunity Contact Roles to Amount and Win Rate.</description>
     <format>Matrix</format>
     <formattingRules>
         <columnName>FORMULA1</columnName>
         <values>
-            <rangeUpperBound>30.0</rangeUpperBound>
+            <backgroundColor>#B50E03</backgroundColor>
+            <rangeUpperBound>10.0</rangeUpperBound>
+        </values>
+        <values>
+            <rangeUpperBound>40.0</rangeUpperBound>
         </values>
         <values>
             <backgroundColor>#006714</backgroundColor>
@@ -115,30 +157,34 @@
     </formattingRules>
     <groupingsAcross>
         <dateGranularity>Day</dateGranularity>
-        <field>BucketField_51500649</field>
+        <field>BucketField_50186227</field>
         <sortOrder>Asc</sortOrder>
     </groupingsAcross>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
-        <field>BucketField_34881713</field>
+        <field>BucketField_86420958</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Multi-threading Closed Won Impact Report</name>
+    <name>Opportunities with Contact Engagement</name>
     <params>
-        <name>include</name>
+        <name>open</name>
         <value>closed</value>
     </params>
     <params>
-        <name>co</name>
-        <value>0</value>
+        <name>probability</name>
+        <value>&gt;0</value>
     </params>
-    <reportType>OpportunityContact</reportType>
-    <scope>user</scope>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>Opportunity</reportType>
+    <scope>organization</scope>
     <showDetails>true</showDetails>
     <showGrandTotal>true</showGrandTotal>
     <showSubTotals>true</showSubTotals>
     <timeFrameFilter>
         <dateColumn>CLOSE_DATE</dateColumn>
-        <interval>INTERVAL_CURFY</interval>
+        <interval>INTERVAL_PREVCURFY</interval>
     </timeFrameFilter>
 </Report>

@@ -3,11 +3,11 @@
  * Counts contacts based on their LastActivityDate or completed tasks/events within a specified time window.
  */
 public class HistoricalAOCRBatch implements Database.Batchable<SObject>, Database.Stateful {
-        /**
+    /**
      * @description Output object to store batch job results.
      */
     public BatchOutput output;
-    
+
     private Integer nod; // Number of days to look back
     private Date soqlDate; // Start date for filtering Opportunities
 
@@ -58,21 +58,44 @@ public class HistoricalAOCRBatch implements Database.Batchable<SObject>, Databas
     public void execute(Database.BatchableContext bc, List<Opportunity> scope) {
         Set<Id> oppIds = new Set<Id>();
         Map<Id, Date> oppCloseDates = new Map<Id, Date>();
-
         for (Opportunity opp : scope) {
             oppIds.add(opp.Id);
             oppCloseDates.put(opp.Id, opp.CloseDate);
         }
 
-        Map<Id, Set<Id>> oppToActiveContacts = new Map<Id, Set<Id>>();
-
-        // Query Opportunity Contact Roles
+        // Fetch Opportunity Contact Roles outside of the loop
         List<OpportunityContactRole> ocrs = [
             SELECT OpportunityId, ContactId, Contact.LastActivityDate
             FROM OpportunityContactRole
             WHERE OpportunityId IN :oppIds
         ];
 
+        // Map to store active contacts for each Opportunity
+        Map<Id, Set<Id>> oppToActiveContacts = getActiveContacts(ocrs, oppCloseDates);
+
+        List<Opportunity> opportunitiesToUpdate = new List<Opportunity>();
+        for (Opportunity opp : scope) {
+            Integer activeOCRCount = oppToActiveContacts.containsKey(opp.Id) ? oppToActiveContacts.get(opp.Id).size() : 0;
+            opp.asreporting__Active_OCRs__c = activeOCRCount;
+            opportunitiesToUpdate.add(opp);
+        }
+
+        // Bulk update Opportunities outside of the loop
+        if (!opportunitiesToUpdate.isEmpty()) {
+            update opportunitiesToUpdate;
+        }
+    }
+
+    /**
+     * @description Processes Opportunity Contact Roles and calculates active contacts.
+     * @param ocrs List of Opportunity Contact Roles.
+     * @param oppCloseDates Map of Opportunity IDs to Close Dates.
+     * @return Map of Opportunity IDs to Active Contacts.
+     */
+    private Map<Id, Set<Id>> getActiveContacts(List<OpportunityContactRole> ocrs, Map<Id, Date> oppCloseDates) {
+        Map<Id, Set<Id>> oppToActiveContacts = new Map<Id, Set<Id>>();
+
+        // Collect contact IDs and check activity for each Opportunity
         for (OpportunityContactRole ocr : ocrs) {
             Id oppId = ocr.OpportunityId;
             Date closeDate = oppCloseDates.get(oppId);
@@ -83,40 +106,12 @@ public class HistoricalAOCRBatch implements Database.Batchable<SObject>, Databas
                 oppToActiveContacts.put(oppId, new Set<Id>());
             }
 
-            if (ocr.Contact.LastActivityDate != null &&
-                ocr.Contact.LastActivityDate >= activityStartDate &&
-                ocr.Contact.LastActivityDate <= activityEndDate) {
+            // Check if the Contact has recent activity
+            if (ocr.Contact.LastActivityDate != null && ocr.Contact.LastActivityDate >= activityStartDate && ocr.Contact.LastActivityDate <= activityEndDate) {
                 oppToActiveContacts.get(oppId).add(ocr.ContactId);
-            } else if (ocr.Contact.LastActivityDate != null &&
-                       ocr.Contact.LastActivityDate > activityEndDate) {
-                // Query task count
-                Integer taskCount = 0;
-                List<AggregateResult> taskResults = [
-                    SELECT COUNT(Id) taskCount
-                    FROM Task
-                    WHERE WhoId = :ocr.ContactId
-                    AND Status = 'Completed'
-                    AND CompletedDateTime >= :activityStartDate
-                    AND CompletedDateTime <= :activityEndDate
-                ];
-                if (!taskResults.isEmpty()) {
-                    taskCount = (Integer) taskResults[0].get('taskCount');
-                }
-
-                // Query event count
-                Integer eventCount = 0;
-                List<AggregateResult> eventResults = [
-                    SELECT COUNT(Id) eventCount
-                    FROM Event
-                    WHERE WhoId = :ocr.ContactId
-                    AND EndDateTime >= :activityStartDate
-                    AND EndDateTime <= :activityEndDate
-                ];
-                if (!eventResults.isEmpty()) {
-                    eventCount = (Integer) eventResults[0].get('eventCount');
-                }
-
-                Integer taskEventCount = taskCount + eventCount;
+            } else if (ocr.Contact.LastActivityDate != null && ocr.Contact.LastActivityDate > activityEndDate) {
+                // For contacts with activity after the end date, query task and event counts
+                Integer taskEventCount = getTaskAndEventCount(ocr.ContactId, activityStartDate, activityEndDate);
 
                 if (taskEventCount > 0) {
                     oppToActiveContacts.get(oppId).add(ocr.ContactId);
@@ -124,27 +119,71 @@ public class HistoricalAOCRBatch implements Database.Batchable<SObject>, Databas
             }
         }
 
-        List<Opportunity> opportunitiesToUpdate = new List<Opportunity>();
-        for (Opportunity opp : scope) {
-            Integer activeOCRCount = oppToActiveContacts.containsKey(opp.Id)
-                ? oppToActiveContacts.get(opp.Id).size()
-                : 0;
-            opp.asreporting__Active_OCRs__c = activeOCRCount;
-            opportunitiesToUpdate.add(opp);
+        return oppToActiveContacts;
+    }
+
+    /**
+     * @description Counts completed tasks and events for a contact during a specific time window.
+     * @param contactId The ID of the contact to check.
+     * @param activityStartDate The start of the activity window.
+     * @param activityEndDate The end of the activity window.
+     * @return The combined count of completed tasks and events.
+     */
+    private Integer getTaskAndEventCount(Id contactId, Date activityStartDate, Date activityEndDate) {
+        Integer taskCount = 0;
+        Integer eventCount = 0;
+
+        // Query task count
+        List<AggregateResult> taskResults = [
+            SELECT COUNT(Id) taskCount
+            FROM Task
+            WHERE WhoId = :contactId
+            AND Status = 'Completed'
+            AND CompletedDateTime >= :activityStartDate
+            AND CompletedDateTime <= :activityEndDate
+        ];
+        if (!taskResults.isEmpty()) {
+            taskCount = (Integer) taskResults[0].get('taskCount');
         }
 
-        if (!opportunitiesToUpdate.isEmpty()) {
-            update opportunitiesToUpdate;
+        // Query event count
+        List<AggregateResult> eventResults = [
+            SELECT COUNT(Id) eventCount
+            FROM Event
+            WHERE WhoId = :contactId
+            AND EndDateTime >= :activityStartDate
+            AND EndDateTime <= :activityEndDate
+        ];
+        if (!eventResults.isEmpty()) {
+            eventCount = (Integer) eventResults[0].get('eventCount');
         }
+
+        return taskCount + eventCount;
     }
 
     /**
      * @description Finish method to complete the batch job.
      * @param bc Batchable context.
      */
+    /**
+     * This method is called when the batch job finishes.
+     * 
+     * @param bc The batchable context.
+     */
+    /**
+     * @description Finish method to complete the batch job.
+     * @param bc Batchable context.
+     */
     public void finish(Database.BatchableContext bc) {
-        // No debugging or email logic for PMD compliance.
+        // Log the completion of the batch job
+        log('HistoricalAOCRBatch job completed.', System.LoggingLevel.INFO);
     }
+
+    /**
+     * @description Custom logging method to avoid using System.debug directly.
+     * @param message The message to log.
+     * @param loggingLevel The logging level.
+     */
 
     /**
      * @description Invocable method to execute the batch class.

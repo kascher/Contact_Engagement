@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dashboard xmlns="http://soap.sforce.com/2006/04/metadata">
+    <backgroundEndColor>#FFFFFF</backgroundEndColor>
+    <backgroundFadeDirection>Diagonal</backgroundFadeDirection>
+    <backgroundStartColor>#FFFFFF</backgroundStartColor>
+    <chartTheme>dark</chartTheme>
+    <colorPalette>unity</colorPalette>
+    <dashboardChartTheme>dark</dashboardChartTheme>
+    <dashboardColorPalette>unity</dashboardColorPalette>
+    <dashboardGridLayout>
+        <dashboardGridComponents>
+            <colSpan>1</colSpan>
+            <columnIndex>0</columnIndex>
+            <dashboardComponent>
+                <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+                <componentType>Image</componentType>
+                <dashboardComponentContents>
+                    <additionalInfo>{&quot;contentDocumentId&quot;:&quot;069fJ000000bwjPQAQ&quot;,&quot;fileAssetName&quot;:&quot;Transparent_Faviconpng&quot;,&quot;inlineWidgetStyle&quot;:{},&quot;namespacePrefix&quot;:&quot;asreporting&quot;}</additionalInfo>
+                    <fileName>Transparent Favicon.png</fileName>
+                    <fit>fitheight</fit>
+                    <horizontalAlignment>center</horizontalAlignment>
+                    <verticalAlignment>top</verticalAlignment>
+                </dashboardComponentContents>
+                <groupingSortProperties/>
+            </dashboardComponent>
+            <rowIndex>0</rowIndex>
+            <rowSpan>2</rowSpan>
+        </dashboardGridComponents>
+        <dashboardGridComponents>
+            <colSpan>11</colSpan>
+            <columnIndex>1</columnIndex>
+            <dashboardComponent>
+                <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+                <componentType>RichText</componentType>
+                <dashboardComponentContents>
+                    <richTextContent>[{\&amp;quot;attributes\&amp;quot;:{\&amp;quot;color\&amp;quot;:\&amp;quot;#ffffff\&amp;quot;,\&amp;quot;size\&amp;quot;:\&amp;quot;16px\&amp;quot;},\&amp;quot;insert\&amp;quot;:\&amp;quot;The Pipeline Analytics Dashboard provides additional Opportunity insights and metrics to help you create and close more Opportunities.\&amp;quot;},{\&amp;quot;attributes\&amp;quot;:{\&amp;quot;align\&amp;quot;:\&amp;quot;left\&amp;quot;},\&amp;quot;insert\&amp;quot;:\&amp;quot;\\n\&amp;quot;},{\&amp;quot;attributes\&amp;quot;:{\&amp;quot;color\&amp;quot;:\&amp;quot;#ffffff\&amp;quot;,\&amp;quot;size\&amp;quot;:\&amp;quot;16px\&amp;quot;},\&amp;quot;insert\&amp;quot;:\&amp;quot;\uD83D\uDE00 The first report is the Opportunity with Contact Engagement report which shows the impact multithreading has on Opportunity Win Rates and Amounts.\&amp;quot;},{\&amp;quot;attributes\&amp;quot;:{\&amp;quot;align\&amp;quot;:\&amp;quot;left\&amp;quot;},\&amp;quot;insert\&amp;quot;:\&amp;quot;\\n\&amp;quot;}]</richTextContent>
+                </dashboardComponentContents>
+                <groupingSortProperties/>
+            </dashboardComponent>
+            <rowIndex>0</rowIndex>
+            <rowSpan>2</rowSpan>
+        </dashboardGridComponents>
+        <dashboardGridComponents>
+            <colSpan>4</colSpan>
+            <columnIndex>0</columnIndex>
+            <dashboardComponent>
+                <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+                <chartAxisRange>Auto</chartAxisRange>
+                <componentType>Bar</componentType>
+                <displayUnits>Auto</displayUnits>
+                <drillEnabled>false</drillEnabled>
+                <drillToDetailEnabled>false</drillToDetailEnabled>
+                <enableHover>false</enableHover>
+                <expandOthers>false</expandOthers>
+                <groupingSortProperties/>
+                <header>Opportunities with Contact Engagement</header>
+                <report>AcousticSellingPipelineAnalysis/Opportunities_with_Contact_Engagement_fYv</report>
+                <showPercentage>false</showPercentage>
+                <showValues>false</showValues>
+                <sortBy>RowLabelAscending</sortBy>
+                <useReportChart>true</useReportChart>
+            </dashboardComponent>
+            <rowIndex>2</rowIndex>
+            <rowSpan>8</rowSpan>
+        </dashboardGridComponents>
+        <numberOfColumns>12</numberOfColumns>
+        <rowHeight>36</rowHeight>
+    </dashboardGridLayout>
+    <dashboardType>SpecifiedUser</dashboardType>
+    <description>Pipeline Analytics Reports that give greater insight into Opportunity Health</description>
+    <isGridLayout>true</isGridLayout>
+    <owner>asreporting@acousticselling.com</owner>
+    <runningUser>asreporting@acousticselling.com</runningUser>
+    <textColor>#000000</textColor>
+    <title>Pipeline Analytics Dashboard</title>
+    <titleColor>#000000</titleColor>
+    <titleSize>12</titleSize>
+</Dashboard>
