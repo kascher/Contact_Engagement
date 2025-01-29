@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionCalls>
-        <description>Runs an Invocable Batch class and returns the job results</description>
-        <name>Run_Batch_Active_OCR_Count</name>
-        <label>Run Batch Active OCR Count</label>
+        <name>Historical_Active_OCR_Batch</name>
+        <label>Historical Active OCR Batch</label>
         <locationX>176</locationX>
         <locationY>134</locationY>
-        <actionName>OpportunityActiveContactBatch</actionName>
+        <actionName>HistoricalAOCRBatch</actionName>
         <actionType>apex</actionType>
         <connector>
             <targetReference>Set_Output_Variables</targetReference>
@@ -24,7 +23,7 @@
                 <elementReference>AnalysisStartDate</elementReference>
             </value>
         </inputParameters>
-        <nameSegment>OpportunityActiveContactBatch</nameSegment>
+        <nameSegment>HistoricalAOCRBatch</nameSegment>
         <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
         <versionSegment>1</versionSegment>
@@ -39,28 +38,28 @@
             <assignToReference>ErrorCount</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Run_Batch_Active_OCR_Count.errorCount</elementReference>
+                <elementReference>Historical_Active_OCR_Batch.errorCount</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>jobStatus</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Run_Batch_Active_OCR_Count.jobStatus</elementReference>
+                <elementReference>Historical_Active_OCR_Batch.jobStatus</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>RecordsProcessed</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Run_Batch_Active_OCR_Count.recordsProcessed</elementReference>
+                <elementReference>Historical_Active_OCR_Batch.recordsProcessed</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>TotalJobItems</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Run_Batch_Active_OCR_Count.totalJobItems</elementReference>
+                <elementReference>Historical_Active_OCR_Batch.totalJobItems</elementReference>
             </value>
         </assignmentItems>
     </assignments>
@@ -91,7 +90,7 @@
         <locationX>50</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Run_Batch_Active_OCR_Count</targetReference>
+            <targetReference>Historical_Active_OCR_Batch</targetReference>
         </connector>
     </start>
     <status>Active</status>

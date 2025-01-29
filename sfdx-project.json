@@ -2,7 +2,7 @@
   "packageDirectories": [
     {
       "versionName": "Q1 2025 Release",
-      "versionNumber": "1.0.0.NEXT",
+      "versionNumber": "1.1.0.NEXT",
       "path": "force-app",
       "default": true,
       "package": "Pipeline Analytics",
