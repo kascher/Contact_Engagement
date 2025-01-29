@@ -71,13 +71,16 @@ public with sharing class HistoricalAOCRBatch implements Database.Batchable<SObj
             Integer activeOCRCount = oppToActiveContacts.containsKey(opp.Id)
                 ? oppToActiveContacts.get(opp.Id).size()
                 : 0;
-            opp.asreporting__Active_OCRs__c = activeOCRCount;
-            opportunitiesToUpdate.add(opp);
+            if (Schema.sObjectType.Opportunity.fields.asreporting__Active_OCRs__c.isUpdateable()) {
+                opp.asreporting__Active_OCRs__c = activeOCRCount;
+                opportunitiesToUpdate.add(opp);
+            }
         }
 
-        if (!opportunitiesToUpdate.isEmpty()) {
+        if (!opportunitiesToUpdate.isEmpty() && Schema.sObjectType.Opportunity.isUpdateable()) {
             update opportunitiesToUpdate;
         }
+
 
         // Update the output object
         this.output.recordsProcessed += scope.size();
