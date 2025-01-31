@@ -29,8 +29,5 @@
 This report buckets Active Opportunity Contact Roles (“Active OCRs”) vs Opportunity Amount in order to find the optimal amount of Contact Engagement for Win Rates and deal size. Customize the bucket settings and conditional formatting to meet your business requirements.
 
 
-![](media/b0efbc10f73184d7041f86847c28342b.png)
-
 5.  The **Pipeline Analytics Dashboard** is located in the AcousticSelling Pipeline Analytics Folder and contains the Opportunities with Contact Engagement report and is a great place to include your derivative reports. More pipeline metrics will be added in future updates.
 
-    ![A screenshot of a computer Description automatically generated](media/16cda3563f3beef4525f9e03400c180b.png)
