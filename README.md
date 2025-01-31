@@ -10,7 +10,6 @@
 
 2.  Permission Set Assignment
 
-    ![](media/03a1d33c721c3212b83a99dc30371fce.png)
 
     -   **AS Multithreading Report Admin**: Read/Write access to all custom fields; can run batch job to retroactively analyze Opportunities, can access AcousticSelling Report Setting Page
     -   **AS Multithreading Report User:** Read Access to Custom Fields and Reports
@@ -20,7 +19,6 @@
 
     To change the default, go to Quick Find-\>Custom Metadata-\>N Days-\>Manage Records-\>Active Contact Window/Edit
 
-    ![A screen shot of a computer Description automatically generated](media/1d4e8b9de4d25d706be842b56bb7b552.png)
 
     **Step 2** gives you the ability to backfill Active OCR counts from a historical date you choose. Pressing “Start Batch Job” initiates an asynchronous batch job which will vary in duration based on the number of Opportunities its processes. You can check status on the next page and will receive an email once complete.
 
@@ -30,7 +28,6 @@
 
 This report buckets Active Opportunity Contact Roles (“Active OCRs”) vs Opportunity Amount in order to find the optimal amount of Contact Engagement for Win Rates and deal size. Customize the bucket settings and conditional formatting to meet your business requirements.
 
-![A screenshot of a computer Description automatically generated](media/d439eaeec59a30f349b7833bbaf6938b.png)
 
 ![](media/b0efbc10f73184d7041f86847c28342b.png)
 
