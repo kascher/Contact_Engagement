@@ -6,8 +6,6 @@
 
 1.  Installation URL: <https://login.salesforce.com/packaging/installPackage.apexp?p0=04tUR0000014QhhYAE>
 
-    ![A screenshot of a computer Description automatically generated](media/860442c3634621ffe0afec886a5943c1.png)
-
     Select Admins Only
 
 2.  Permission Set Assignment
