@@ -1,12 +1,12 @@
 {
   "packageDirectories": [
     {
-      "versionName": "Q1 2025 Release",
-      "versionNumber": "1.2.0.NEXT",
+      "versionName": "Q1 2025",
+      "versionNumber": "1.0.0.NEXT",
       "path": "force-app",
       "default": true,
       "package": "Pipeline Analytics",
-      "versionDescription": "Multithreading/Contact Engagement report with supporting customizations.  Updated 1/29/25 for Code Analyzer and source code scans"
+      "versionDescription": "Metrics, reports, and dashboards to help Marketing, Sales, and Success Teams win more Opportunities"
     }
   ],
   "name": "Contact_Engagement",
@@ -14,6 +14,6 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "62.0",
   "packageAliases": {
-    "Pipeline Analytics": "0HoUR00000000xh0AA"
+    "Pipeline Analytics": "0HoUR000000018z0AA"
   }
 }
